@@ -60,11 +60,19 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     );
   }
 
+  void _onBoletim() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Ação "Boletim" ainda não implementada')),
+    );
+  }
+
   final color1 = const Color(0xFF23232C);
   final color2 = const Color(0xFF7968D8);
+  final color3 = const Color(0xFF1F1E23);
+  final color4 = const Color(0xFF5c5769);
+  final color5 = const Color(0xF52FFF52);
   final colorError = const Color(0xFFFF5252);
-  final fontSize = 20.0;
-
+  final fontSize = 20.00;
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -145,6 +153,15 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                       flex: 4,
                       child: OutlinedButton(
                         onPressed: _onAdicionar,
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: color3,
+                          side: BorderSide(color: color2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          foregroundColor: color2,
+                          padding: const EdgeInsets.all(16),
+                        ),
                         child: Text('Adicionar',
                             style: TextStyle(
                               color: color2,
@@ -168,7 +185,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 16),
                               decoration: BoxDecoration(
-                                color: color1,
+                                color: color3,
                                 border: Border.all(color: color2),
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -192,7 +209,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 decoration: BoxDecoration(
-                                  color: color1,
+                                  color: color3,
                                   border: Border.all(color: color2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -200,27 +217,29 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
+                                    OutlinedButton(
+                                      onPressed: _onBoletim,
+                                      style: OutlinedButton.styleFrom(
+                                        backgroundColor: color3,
+                                        side: BorderSide(color: _usuarios[index].recebe? color5: color4),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        foregroundColor: _usuarios[index].recebe? color5: color4,
+                                        minimumSize: const Size(48, 48),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: Icon(
                                           Icons.email,
-                                          color: color2,
-                                          size: 20,
-                                        ),
-                                        Checkbox(
-                                          value: _usuarios[index].recebe,
-                                          onChanged: null,
-                                          fillColor:
-                                              WidgetStateProperty.all(color2),
-                                        ),
-                                      ],
+                                          color: _usuarios[index].recebe? color5: color4,
+                                        size: 20,
+                                      ),
                                     ),
                                     OutlinedButton(
                                       onPressed: _onExcluir,
                                       style: OutlinedButton.styleFrom(
-                                        backgroundColor: color1,
+                                        backgroundColor: color3,
                                         side: BorderSide(color: color2),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
