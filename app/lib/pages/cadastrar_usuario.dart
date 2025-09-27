@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app/widgets/app_scaffold.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class CadastrarUsuarioPage extends StatefulWidget {
   const CadastrarUsuarioPage({super.key});
@@ -14,6 +16,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   bool _receberRelatorio = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -23,13 +26,92 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
     super.dispose();
   }
 
-  void _adicionarUsuario() {
+  Future<void> _adicionarUsuario() async {
     if (_formKey.currentState!.validate()) {
-      // adicionar a lógica para cadastrar o usuário depois
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuário cadastrado!')),
-      );
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        print('Enviando requisição para: http://127.0.0.1:8000/users/usuario');
+        print('Dados: email=${_emailController.text.trim()}, recebe_boletim=$_receberRelatorio');
+        
+        final response = await http.post(
+          Uri.parse('http://127.0.0.1:8000/users/usuario'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'email': _emailController.text.trim(),
+            'senha': _senhaController.text,
+            'recebe_boletim': _receberRelatorio,
+          }),
+        );
+
+        print('Status da resposta: ${response.statusCode}');
+        print('Corpo da resposta: ${response.body}');
+
+        final data = json.decode(response.body);
+
+        if (response.statusCode == 200 && data['success'] == true) {
+          // Sucesso - mostrar mensagem e limpar campos
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Usuário cadastrado com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          // Limpar os campos
+          _nomeController.clear();
+          _emailController.clear();
+          _senhaController.clear();
+          setState(() {
+            _receberRelatorio = false;
+          });
+        } else {
+          // Erro - mostrar mensagem de erro
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? data['detail'] ?? 'Erro ao cadastrar usuário'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        print('Erro na requisição: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro de conexão: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Informe o email';
+    }
+    if (!value.contains('@') || !value.contains('.')) {
+      return 'Informe um email válido';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Informe a senha';
+    }
+    if (value.length < 6) {
+      return 'A senha deve ter pelo menos 6 caracteres';
+    }
+    return null;
   }
 
   @override
@@ -43,7 +125,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
               Row(
                 children: [
                   Expanded(
@@ -63,8 +144,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                       decoration: const InputDecoration(
                         labelText: 'Email',
                       ),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Informe o email' : null,
+                      validator: _validateEmail,
                     ),
                   ),
                 ],
@@ -82,8 +162,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                       decoration: const InputDecoration(
                         labelText: 'Senha',
                       ),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Informe a senha' : null,
+                      validator: _validatePassword,
                     ),
                   ),
                   const SizedBox(width: 32),
@@ -96,7 +175,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                         Switch(
                           value: _receberRelatorio,
                           activeColor: Color(0xFF9B8DF7),
-                          onChanged: (value) {
+                          onChanged: _isLoading ? null : (value) {
                             setState(() {
                               _receberRelatorio = value;
                             });
@@ -112,8 +191,14 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
               SizedBox(
                 width: 210,
                 child: ElevatedButton(
-                  onPressed: _adicionarUsuario,
-                  child: const Text('Adicionar'),
+                  onPressed: _isLoading ? null : _adicionarUsuario,
+                  child: _isLoading 
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Adicionar'),
                 ),
               ),
             ],
