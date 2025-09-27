@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:app/widgets/app_scaffold.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Usuario {
   final int id;
@@ -37,9 +38,20 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     _usuariosFuture = listarUsuarios();
   }
 
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
+
   Future<List<Usuario>> listarUsuarios() async {
     final url = Uri.parse('http://localhost:8000/users');
-    final response = await http.get(url);
+    final token = await _getToken();
+    final response = await http.get(
+      url,
+      headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -50,14 +62,68 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     }
   }
 
-  void _onAdicionar() {
-    context.push('/cadastrar/usuario');
+  Future<void> _excluirUsuario(int userId) async {
+    final token = await _getToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Token não encontrado. Faça login novamente.')),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8000/users/$userId');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      
+      setState(() {
+        _usuarios.removeWhere((usuario) => usuario.id == userId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário excluído com sucesso')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao excluir usuário: ${response.statusCode}')),
+      );
+    }
   }
 
-  void _onExcluir() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ação "Excluir" ainda não implementada')),
+
+  void _onExcluir(int userId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Exclusão'),
+          content: const Text('Tem certeza que deseja excluir este usuário?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), 
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); 
+                _excluirUsuario(userId); 
+              },
+              child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  void _onAdicionar() {
+    context.push('/cadastrar/usuario');
   }
 
   void _onBoletim() {
@@ -221,23 +287,30 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                                       onPressed: _onBoletim,
                                       style: OutlinedButton.styleFrom(
                                         backgroundColor: color3,
-                                        side: BorderSide(color: _usuarios[index].recebe? color5: color4),
+                                        side: BorderSide(
+                                            color: _usuarios[index].recebe
+                                                ? color5
+                                                : color4),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
-                                        foregroundColor: _usuarios[index].recebe? color5: color4,
+                                        foregroundColor: _usuarios[index].recebe
+                                            ? color5
+                                            : color4,
                                         minimumSize: const Size(48, 48),
                                         padding: EdgeInsets.zero,
                                       ),
                                       child: Icon(
-                                          Icons.email,
-                                          color: _usuarios[index].recebe? color5: color4,
+                                        Icons.email,
+                                        color: _usuarios[index].recebe
+                                            ? color5
+                                            : color4,
                                         size: 20,
                                       ),
                                     ),
                                     OutlinedButton(
-                                      onPressed: _onExcluir,
+                                      onPressed: () => _onExcluir(_usuarios[index].id), 
                                       style: OutlinedButton.styleFrom(
                                         backgroundColor: color3,
                                         side: BorderSide(color: color2),
