@@ -14,8 +14,8 @@ FRONT-END
     <a href="#telas">Telas e Páginas</a> |
     <a href="#estrutura">Estrutura</a>  |
     <a href="#requisitos">Requisitos</a> |
-    <a href="#execucao">Execução</a> |
     <a href="#teste">Teste</a> | -->
+    <a href="#execucao">Execução</a> |
     <a href="#estrategia">Estratégia de Branches</a>
 </p>
 
@@ -37,17 +37,23 @@ FRONT-END
 
 → [Voltar ao topo](#topo)
 
-<span id="execucao">
-
-## :gear: Instruções para Executar 
-
-→ [Voltar ao topo](#topo)
-
 <span id="teste">
 
 ## 🧪 Instruções para Testar 
 
 → [Voltar ao topo](#topo) -->
+
+<span id="execucao">
+
+## :gear: Instruções para Executar 
+
+- git clone https://github.com/equipe-javali/API_6_FRONT
+
+- cd API_6_FRONT
+
+- Flutter run
+
+→ [Voltar ao topo](#topo)
 
 <span id="estrategia">
 
