@@ -49,7 +49,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     final response = await http.get(
       url,
       headers: {
-        if (token != null) 'Authorization': 'Bearer $token', 
+        if (token != null) 'Authorization': 'Bearer $token',
       },
     );
 
@@ -62,14 +62,68 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     }
   }
 
-  void _onAdicionar() {
-    context.push('/cadastrar/usuario');
+  Future<void> _excluirUsuario(int userId) async {
+    final token = await _getToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Token não encontrado. Faça login novamente.')),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8000/users/$userId');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      
+      setState(() {
+        _usuarios.removeWhere((usuario) => usuario.id == userId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário excluído com sucesso')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao excluir usuário: ${response.statusCode}')),
+      );
+    }
   }
 
-  void _onExcluir() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ação "Excluir" ainda não implementada')),
+
+  void _onExcluir(int userId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Exclusão'),
+          content: const Text('Tem certeza que deseja excluir este usuário?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), 
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); 
+                _excluirUsuario(userId); 
+              },
+              child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  void _onAdicionar() {
+    context.push('/cadastrar/usuario');
   }
 
   void _onBoletim() {
@@ -256,7 +310,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                                       ),
                                     ),
                                     OutlinedButton(
-                                      onPressed: _onExcluir,
+                                      onPressed: () => _onExcluir(_usuarios[index].id), 
                                       style: OutlinedButton.styleFrom(
                                         backgroundColor: color3,
                                         side: BorderSide(color: color2),
