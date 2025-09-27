@@ -125,66 +125,133 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _nomeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nome',
-                      ),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Informe o nome' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                      ),
-                      validator: _validateEmail,
-                    ),
-                  ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  bool isMobile = constraints.maxWidth < 600;
+                  
+                  if (isMobile) {
+                    return Column(
+                      children: [
+                        TextFormField(
+                          controller: _nomeController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nome',
+                          ),
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Informe o nome' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                          ),
+                          validator: _validateEmail,
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _nomeController,
+                            decoration: const InputDecoration(
+                              labelText: 'Nome',
+                            ),
+                            validator: (value) =>
+                                value == null || value.isEmpty ? 'Informe o nome' : null,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                            ),
+                            validator: _validateEmail,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
               const SizedBox(height: 16),
               
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 487,
-                    child: TextFormField(
-                      controller: _senhaController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Senha',
-                      ),
-                      validator: _validatePassword,
-                    ),
-                  ),
-                  const SizedBox(width: 32),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12.0),
-                    child: Row(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  bool isMobile = constraints.maxWidth < 600;
+                  
+                  if (isMobile) {
+                    return Column(
                       children: [
-                        Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
-                        const SizedBox(width: 8),
-                        Switch(
-                          value: _receberRelatorio,
-                          activeColor: Color(0xFF9B8DF7),
-                          onChanged: _isLoading ? null : (value) {
-                            setState(() {
-                              _receberRelatorio = value;
-                            });
-                          },
+                        TextFormField(
+                          controller: _senhaController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Senha',
+                          ),
+                          validator: _validatePassword,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
+                            const SizedBox(width: 8),
+                            Switch(
+                              value: _receberRelatorio,
+                              activeColor: Color(0xFF9B8DF7),
+                              onChanged: _isLoading ? null : (value) {
+                                setState(() {
+                                  _receberRelatorio = value;
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ),
-                ],
+                    );
+                  } else {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 487,
+                          child: TextFormField(
+                            controller: _senhaController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Senha',
+                            ),
+                            validator: _validatePassword,
+                          ),
+                        ),
+                        const SizedBox(width: 32),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12.0),
+                          child: Row(
+                            children: [
+                              Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
+                              const SizedBox(width: 8),
+                              Switch(
+                                value: _receberRelatorio,
+                                activeColor: Color(0xFF9B8DF7),
+                                onChanged: _isLoading ? null : (value) {
+                                  setState(() {
+                                    _receberRelatorio = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
               const SizedBox(height: 24),
               
