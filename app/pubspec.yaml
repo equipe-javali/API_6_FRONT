@@ -21,6 +21,7 @@ dependencies:
   
   # Rede (para futuras integrações com API)
   dio: ^5.4.0
+  http: ^1.1.0
   
   # Internacionalização
   intl: 0.20.2
