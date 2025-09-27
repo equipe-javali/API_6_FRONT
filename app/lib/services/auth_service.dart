@@ -1,33 +1,50 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String baseUrl = "http://127.0.0.1:8000"; 
+  final String baseUrl = "http://127.0.0.1:8000";
+
   Future<String?> login(String username, String password) async {
-  try {
-    final url = Uri.parse("$baseUrl/token");
+    try {
+      final url = Uri.parse("$baseUrl/token");
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: {
-        "grant_type": "password",
-        "username": username,
-        "password": password,
-      },
-    );
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {
+          "grant_type": "password",
+          "username": username,
+          "password": password,
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data["access_token"];
-    } else {
-      print("Erro: ${response.body}");
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data["access_token"];
+
+        // salvar no SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("access_token", token);
+
+        return token;
+      } else {
+        print("Erro: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Exceção no login: $e");
       return null;
     }
-  } catch (e) {
-    print("Exceção no login: $e");
-    return null;
   }
-}
 
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("access_token");
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("access_token");
+  }
 }
