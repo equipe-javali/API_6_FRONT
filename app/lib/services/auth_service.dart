@@ -3,29 +3,46 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String baseUrl = 'http://127.0.0.1:8000';
+  final String baseUrl = "http://127.0.0.1:8000";
 
-  Future<Map<String, dynamic>> login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/token'),
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: 'username=$username&password=$password',
-    );
+  Future<String?> login(String username, String password) async {
+    try {
+      final url = Uri.parse("$baseUrl/token");
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      // Salvar token
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('access_token', data['access_token']);      
-      return data;
-    } else {
-      throw Exception('Falha no login');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {
+          "grant_type": "password",
+          "username": username,
+          "password": password,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data["access_token"];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("access_token", token);
+
+        return token;
+      } else {
+        print("Erro: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Exceção no login: $e");
+      return null;
     }
   }
 
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');    
-    return token;
+    return prefs.getString("access_token");
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("access_token");
   }
 }
