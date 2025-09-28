@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!mounted) return;
     if (token != null) {
-      context.go('/home');
+      context.go('/usuarios');
     } else {
       setState(() {
         errorMessage = "Usuário ou senha inválidos";

@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:app/pages/login.dart';
-import 'package:app/pages/home.dart';
-import 'package:app/pages/chat.dart';
+// import 'package:app/pages/home.dart';
+// import 'package:app/pages/chat.dart';
 import 'package:app/pages/listar_usuarios.dart';
 import 'package:app/pages/cadastrar_usuario.dart';
 
@@ -12,14 +12,14 @@ final GoRouter appRouter = GoRouter(
       path: '/login',
       builder: (context, state) => const LoginPage(),
     ),
-    GoRoute(
-      path: '/home',
-      builder: (context, state) => const HomePage(),
-    ),
-    GoRoute(
-      path: '/chat',
-      builder: (context, state) => const ChatPage(),
-    ),
+    // GoRoute(
+    //   path: '/home',
+    //   builder: (context, state) => const HomePage(),
+    // ),
+    // GoRoute(
+    //   path: '/chat',
+    //   builder: (context, state) => const ChatPage(),
+    // ),
     GoRoute(
       path: '/usuarios',
       builder: (context, state) => const ListarUsuariosPage(),
