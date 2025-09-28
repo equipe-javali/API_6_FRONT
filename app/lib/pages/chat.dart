@@ -18,13 +18,13 @@ class ChatPage extends StatelessWidget {
   }
 }
 
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'Chat Page',
-          style: TextStyle(fontSize: 24),
-        ),
+Widget build(BuildContext context) {
+  return const Scaffold(
+    body: Center(
+      child: Text(
+        'Chat Page',
+        style: TextStyle(fontSize: 24),
       ),
-    );
-  }
+    ),
+  );
+}

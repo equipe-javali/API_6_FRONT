@@ -64,6 +64,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
 
   Future<void> _excluirUsuario(int userId) async {
     final token = await _getToken();
+    if (!mounted) return;
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -80,6 +81,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       },
     );
 
+    if (!mounted) return;
     if (response.statusCode == 200) {
       setState(() {
         _usuarios.removeWhere((usuario) => usuario.id == userId);
@@ -104,6 +106,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
 
     try {
       final token = await _getToken();
+      if (!mounted) return;
       if (token == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -118,6 +121,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Relatório enviado com sucesso!')),
@@ -171,6 +175,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
 
   Future<void> _atualizarStatusBoletim(int userId, bool novoStatus) async {
     final token = await _getToken();
+    if (!mounted) return;
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -189,6 +194,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       body: jsonEncode({'recebe_boletim': novoStatus}),
     );
 
+    if (!mounted) return;
     if (response.statusCode == 200) {
       setState(() {
         final index = _usuarios.indexWhere((u) => u.id == userId);

@@ -30,6 +30,7 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => isLoading = false);
 
+    if (!mounted) return;
     if (token != null) {
       context.go('/home');
     } else {
@@ -67,8 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelStyle:
                           GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Color(0xFF9C7BFF)),
+                        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -92,8 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelStyle:
                           GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Color(0xFF9C7BFF)),
+                        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       focusedBorder: OutlineInputBorder(
