@@ -170,7 +170,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   }
 
   void _onAdicionar() {
-    context.push('/cadastrar/usuario');
+    context.go('/cadastrar/usuario');
   }
 
   Future<void> _atualizarStatusBoletim(int userId, bool novoStatus) async {
