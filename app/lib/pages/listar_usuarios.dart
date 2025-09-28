@@ -169,10 +169,53 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     context.push('/cadastrar/usuario');
   }
 
-  void _onBoletim() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ação "Boletim" ainda não implementada')),
+  Future<void> _atualizarStatusBoletim(int userId, bool novoStatus) async {
+    final token = await _getToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Token não encontrado. Faça login novamente.')),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8000/users/$userId/status');
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'recebe_boletim': novoStatus}),
     );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        final index = _usuarios.indexWhere((u) => u.id == userId);
+        if (index != -1) {
+          _usuarios[index] = Usuario(
+            id: _usuarios[index].id,
+            email: _usuarios[index].email,
+            recebe: novoStatus,
+          );
+        }
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Boletim ${novoStatus ? "ativado" : "desativado"} para o usuário.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao atualizar status: ${response.statusCode}')),
+      );
+    }
+  }
+
+  void _onBoletim(Usuario usuario) {
+    final novoStatus = !usuario.recebe;
+    _atualizarStatusBoletim(usuario.id, novoStatus);
   }
 
   final color1 = const Color(0xFF23232C);
@@ -402,7 +445,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     OutlinedButton(
-                                      onPressed: _onBoletim,
+                                      onPressed: () => _onBoletim(_usuarios[index]),
                                       style: OutlinedButton.styleFrom(
                                         backgroundColor: color3,
                                         side: BorderSide(
