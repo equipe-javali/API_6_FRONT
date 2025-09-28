@@ -33,9 +33,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
       });
 
       try {
-        print('Enviando requisição para: http://127.0.0.1:8000/users/usuario');
-        print('Dados: email=${_emailController.text.trim()}, recebe_boletim=$_receberRelatorio');
-        
         final response = await http.post(
           Uri.parse('http://127.0.0.1:8000/users/usuario'),
           headers: {
@@ -48,20 +45,19 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           }),
         );
 
-        print('Status da resposta: ${response.statusCode}');
-        print('Corpo da resposta: ${response.body}');
-
         final data = json.decode(response.body);
 
+        if (!mounted) return;
         if (response.statusCode == 200 && data['success'] == true) {
           // Sucesso - mostrar mensagem e limpar campos
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(data['message'] ?? 'Usuário cadastrado com sucesso!'),
+              content:
+                  Text(data['message'] ?? 'Usuário cadastrado com sucesso!'),
               backgroundColor: Colors.green,
             ),
           );
-          
+
           // Limpar os campos
           _nomeController.clear();
           _emailController.clear();
@@ -73,13 +69,14 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           // Erro - mostrar mensagem de erro
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(data['message'] ?? data['detail'] ?? 'Erro ao cadastrar usuário'),
+              content: Text(data['message'] ??
+                  data['detail'] ??
+                  'Erro ao cadastrar usuário'),
               backgroundColor: Colors.red,
             ),
           );
         }
       } catch (e) {
-        print('Erro na requisição: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro de conexão: $e'),
@@ -128,7 +125,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
               LayoutBuilder(
                 builder: (context, constraints) {
                   bool isMobile = constraints.maxWidth < 600;
-                  
+
                   if (isMobile) {
                     return Column(
                       children: [
@@ -137,8 +134,9 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                           decoration: const InputDecoration(
                             labelText: 'Nome',
                           ),
-                          validator: (value) =>
-                              value == null || value.isEmpty ? 'Informe o nome' : null,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Informe o nome'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -159,8 +157,9 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                             decoration: const InputDecoration(
                               labelText: 'Nome',
                             ),
-                            validator: (value) =>
-                                value == null || value.isEmpty ? 'Informe o nome' : null,
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Informe o nome'
+                                : null,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -179,11 +178,10 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                 },
               ),
               const SizedBox(height: 16),
-              
               LayoutBuilder(
                 builder: (context, constraints) {
                   bool isMobile = constraints.maxWidth < 600;
-                  
+
                   if (isMobile) {
                     return Column(
                       children: [
@@ -199,16 +197,19 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
+                            const Text('Receber relatório',
+                                style: TextStyle(color: Color(0xFF9B8DF7))),
                             const SizedBox(width: 8),
                             Switch(
                               value: _receberRelatorio,
-                              activeColor: Color(0xFF9B8DF7),
-                              onChanged: _isLoading ? null : (value) {
-                                setState(() {
-                                  _receberRelatorio = value;
-                                });
-                              },
+                              activeColor: const Color(0xFF9B8DF7),
+                              onChanged: _isLoading
+                                  ? null
+                                  : (value) {
+                                      setState(() {
+                                        _receberRelatorio = value;
+                                      });
+                                    },
                             ),
                           ],
                         ),
@@ -234,16 +235,19 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                           padding: const EdgeInsets.only(top: 12.0),
                           child: Row(
                             children: [
-                              Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
+                              const Text('Receber relatório',
+                                  style: TextStyle(color: Color(0xFF9B8DF7))),
                               const SizedBox(width: 8),
                               Switch(
                                 value: _receberRelatorio,
-                                activeColor: Color(0xFF9B8DF7),
-                                onChanged: _isLoading ? null : (value) {
-                                  setState(() {
-                                    _receberRelatorio = value;
-                                  });
-                                },
+                                activeColor: const Color(0xFF9B8DF7),
+                                onChanged: _isLoading
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          _receberRelatorio = value;
+                                        });
+                                      },
                               ),
                             ],
                           ),
@@ -254,18 +258,17 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                 },
               ),
               const SizedBox(height: 24),
-              
               SizedBox(
                 width: 210,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _adicionarUsuario,
-                  child: _isLoading 
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Adicionar'),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Adicionar'),
                 ),
               ),
             ],

@@ -15,17 +15,17 @@ class AppMenu extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
-              children: [
-                _MenuItem(
-                  icon: Icons.home_outlined,
-                  title: 'Home',
-                  route: '/home',
-                ),
-                _MenuItem(
-                  icon: Icons.chat_outlined,
-                  title: 'Chat',
-                  route: '/chat',
-                ),
+              children: const [
+                // _MenuItem(
+                //   icon: Icons.home_outlined,
+                //   title: 'Home',
+                //   route: '/home',
+                // ),
+                // _MenuItem(
+                //   icon: Icons.chat_outlined,
+                //   title: 'Chat',
+                //   route: '/chat',
+                // ),
                 _MenuItem(
                   icon: Icons.people_outline,
                   title: 'Usuários',
@@ -36,7 +36,7 @@ class AppMenu extends StatelessWidget {
                   title: 'Cadastrar Usuário',
                   route: '/cadastrar/usuario',
                 ),
-                const Divider(color: AppTheme.borderColor),
+                Divider(color: AppTheme.borderColor),
                 _MenuItem(
                   icon: Icons.logout,
                   title: 'Sair',
@@ -73,7 +73,7 @@ class _MenuItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.primaryColor.withOpacity(0.1) : null,
+        color: isActive ? AppTheme.primaryColor.withAlpha((0.1 * 255).round()) : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(

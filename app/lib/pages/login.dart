@@ -30,8 +30,9 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => isLoading = false);
 
+    if (!mounted) return;
     if (token != null) {
-      context.go('/home');
+      context.go('/usuarios');
     } else {
       setState(() {
         errorMessage = "Usuário ou senha inválidos";
@@ -52,8 +53,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.auto_awesome,
-                      color: const Color(0xFF9C7BFF), size: 64),
+                  const Icon(Icons.auto_awesome,
+                      color: Color(0xFF9C7BFF), size: 64),
                   const SizedBox(height: 40),
 
                   // Email
@@ -67,8 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelStyle:
                           GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Color(0xFF9C7BFF)),
+                        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -92,8 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelStyle:
                           GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Color(0xFF9C7BFF)),
+                        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       focusedBorder: OutlineInputBorder(
