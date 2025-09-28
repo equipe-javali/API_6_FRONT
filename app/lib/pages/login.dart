@@ -52,8 +52,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.auto_awesome,
-                      color: const Color(0xFF9C7BFF), size: 64),
+                  const Icon(Icons.auto_awesome,
+                      color: Color(0xFF9C7BFF), size: 64),
                   const SizedBox(height: 40),
 
                   // Email

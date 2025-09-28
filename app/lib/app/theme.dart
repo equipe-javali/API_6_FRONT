@@ -16,15 +16,13 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: backgroundColor,
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: primaryColor,
       secondary: accentColor,
       surface: surfaceColor,
-      background: backgroundColor,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: textPrimaryColor,
-      onBackground: textPrimaryColor,
     ),
     textTheme: GoogleFonts.interTextTheme(
       ThemeData.dark().textTheme.copyWith(
@@ -114,7 +112,7 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
-    colorScheme: ColorScheme.light(
+    colorScheme: const ColorScheme.light(
       primary: primaryColor,
       secondary: accentColor,
     ),

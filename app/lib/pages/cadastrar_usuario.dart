@@ -33,8 +33,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
       });
 
       try {
-        print('Enviando requisição para: http://127.0.0.1:8000/users/usuario');
-        print('Dados: email=${_emailController.text.trim()}, recebe_boletim=$_receberRelatorio');
         
         final response = await http.post(
           Uri.parse('http://127.0.0.1:8000/users/usuario'),
@@ -47,9 +45,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
             'recebe_boletim': _receberRelatorio,
           }),
         );
-
-        print('Status da resposta: ${response.statusCode}');
-        print('Corpo da resposta: ${response.body}');
 
         final data = json.decode(response.body);
 
@@ -79,7 +74,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           );
         }
       } catch (e) {
-        print('Erro na requisição: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro de conexão: $e'),
@@ -199,11 +193,11 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
+                            const Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
                             const SizedBox(width: 8),
                             Switch(
                               value: _receberRelatorio,
-                              activeColor: Color(0xFF9B8DF7),
+                              activeColor: const Color(0xFF9B8DF7),
                               onChanged: _isLoading ? null : (value) {
                                 setState(() {
                                   _receberRelatorio = value;
@@ -234,11 +228,11 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                           padding: const EdgeInsets.only(top: 12.0),
                           child: Row(
                             children: [
-                              Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
+                              const Text('Receber relatório', style: TextStyle(color: Color(0xFF9B8DF7))),
                               const SizedBox(width: 8),
                               Switch(
                                 value: _receberRelatorio,
-                                activeColor: Color(0xFF9B8DF7),
+                                activeColor: const Color(0xFF9B8DF7),
                                 onChanged: _isLoading ? null : (value) {
                                   setState(() {
                                     _receberRelatorio = value;
