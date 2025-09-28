@@ -44,7 +44,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   }
 
   Future<List<Usuario>> listarUsuarios() async {
-    final url = Uri.parse('http://localhost:8000/users');
+    final url = Uri.parse('http://127.0.0.1:8000/users');
     final token = await _getToken();
     final response = await http.get(
       url,
@@ -72,7 +72,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       return;
     }
 
-    final url = Uri.parse('http://localhost:8000/users/$userId');
+    final url = Uri.parse('http://127.0.0.1:8000/users/$userId');
     final response = await http.delete(
       url,
       headers: {
@@ -112,7 +112,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
         return;
       }
 
-      final url = Uri.parse('http://localhost:8000/enviar-relatorio');
+      final url = Uri.parse('http://127.0.0.1:8000/enviar-relatorio');
       final response = await http.post(
         url,
         headers: {'Authorization': 'Bearer $token'},
@@ -157,7 +157,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                 Navigator.of(context).pop();
                 _excluirUsuario(userId);
               },
-              child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+              child: Text('Excluir', style: TextStyle(color: colorError)),
             ),
           ],
         );
@@ -179,7 +179,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       return;
     }
 
-    final url = Uri.parse('http://localhost:8000/users/$userId/status');
+    final url = Uri.parse('http://127.0.0.1:8000/users/$userId/status');
     final response = await http.put(
       url,
       headers: {
@@ -272,12 +272,12 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                                     padding: const EdgeInsets.all(16),
                                   ),
                                   child: isSendingReport
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           height: 20,
                                           width: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: Colors.white,
+                                            color: color2,
                                           ),
                                         )
                                       : Text(
@@ -329,74 +329,69 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
             height: double.infinity,
             child: Column(
               children: [
-                Flex(
-                  direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      flex: 4,
-                      child: Text(
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      Text(
                         'Usuários',
-                        style: TextStyle(
-                          color: color2,
-                          fontSize: fontSize,
-                        ),
+                        style: TextStyle(color: color2, fontSize: fontSize),
                       ),
-                    ),
-                    Flexible(
-                        flex: 6,
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              OutlinedButton(
-                                onPressed:
-                                    isSendingReport ? null : _enviarRelatorio,
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: color3,
-                                  side: BorderSide(color: color2),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  foregroundColor: color2,
-                                  padding: const EdgeInsets.all(16),
-                                ),
-                                child: isSendingReport
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : Text(
-                                        'Enviar relatório',
-                                        style: TextStyle(
-                                          color: color2,
-                                          fontSize: fontSize,
-                                        ),
-                                      ),
+                      Wrap(
+                        spacing: 10,
+                        children: [
+                          OutlinedButton(
+                            onPressed:
+                                isSendingReport ? null : _enviarRelatorio,
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: color3,
+                              side: BorderSide(color: color2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              const SizedBox(width: 10),
-                              OutlinedButton(
-                                onPressed: _onAdicionar,
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: color3,
-                                  side: BorderSide(color: color2),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  foregroundColor: color2,
-                                  padding: const EdgeInsets.all(16),
-                                ),
-                                child: Text('Adicionar',
-                                    style: TextStyle(
+                              foregroundColor: color2,
+                              padding: const EdgeInsets.all(16),
+                            ),
+                            child: isSendingReport
+                                ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
                                       color: color2,
-                                      fontSize: fontSize,
-                                    )),
+                                    ),
+                                  )
+                                : Text(
+                                    'Enviar relatório',
+                                    style: TextStyle(
+                                        color: color2, fontSize: fontSize),
+                                  ),
+                          ),
+                          OutlinedButton(
+                            onPressed: _onAdicionar,
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: color3,
+                              side: BorderSide(color: color2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ])),
-                  ],
+                              foregroundColor: color2,
+                              padding: const EdgeInsets.all(16),
+                            ),
+                            child: Text(
+                              'Adicionar',
+                              style:
+                                  TextStyle(color: color2, fontSize: fontSize),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Expanded(
@@ -445,7 +440,8 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     OutlinedButton(
-                                      onPressed: () => _onBoletim(_usuarios[index]),
+                                      onPressed: () =>
+                                          _onBoletim(_usuarios[index]),
                                       style: OutlinedButton.styleFrom(
                                         backgroundColor: color3,
                                         side: BorderSide(
