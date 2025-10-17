@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:app/widgets/app_scaffold.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:app/services/auth_service.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -13,8 +16,9 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
   bool _isTyping = false;
+  final AuthService _authService = AuthService();
+  int? _userId;
 
-  // 🎨 Cores
   final color1 = const Color(0xFF23232C);
   final color2 = const Color(0xFF7968D8);
   final color3 = const Color(0xFF1F1E23);
@@ -22,6 +26,10 @@ class _ChatPageState extends State<ChatPage> {
   final fontSize = 18.0;
 
   void _sendMessage() {
+    _sendMessageToBackend();
+  }
+
+  Future<void> _sendMessageToBackend() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
@@ -35,16 +43,89 @@ class _ChatPageState extends State<ChatPage> {
     });
     _controller.clear();
 
-    Future.delayed(const Duration(milliseconds: 1200), () {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) {
+        setState(() {
+          _isTyping = false;
+          _messages.add({
+            'text': 'Erro: usuário não autenticado',
+            'isUser': false,
+            'time': DateTime.now(),
+          });
+        });
+        return;
+      }
+
+      if (_userId == null) {
+        await _loadCurrentUser(token);
+        if (_userId == null) throw Exception('Não foi possível determinar id do usuário');
+      }
+
+      final url = Uri.parse('${_authService.baseUrl}/users/enviar-pergunta');
+      final body = jsonEncode({
+        'id_usuario': _userId,
+        'mensagem': text,
+        'ia': false,
+      });
+
+      final resp = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      setState(() => _isTyping = false);
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        final reply = data['mensagem'] ?? 'Pergunta enviada';
+        setState(() {
+          _messages.add({
+            'text': reply,
+            'isUser': false,
+            'time': DateTime.now(),
+          });
+        });
+      } else {
+        setState(() {
+          _messages.add({
+            'text': 'Erro ${resp.statusCode}: ${resp.body}',
+            'isUser': false,
+            'time': DateTime.now(),
+          });
+        });
+      }
+    } catch (e) {
       setState(() {
         _isTyping = false;
         _messages.add({
-          'text': 'Recebido: $text',
+          'text': 'Exceção: $e',
           'isUser': false,
           'time': DateTime.now(),
         });
       });
-    });
+    }
+  }
+
+  Future<void> _loadCurrentUser(String token) async {
+    try {
+      final url = Uri.parse('${_authService.baseUrl}/users/me/');
+      final resp = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        setState(() {
+          _userId = data['id'];
+        });
+      } else {
+        print('Falha ao obter usuário: ${resp.statusCode} ${resp.body}');
+      }
+    } catch (e) {
+      print('Erro ao carregar usuário: $e');
+    }
   }
 
   @override
@@ -57,7 +138,6 @@ class _ChatPageState extends State<ChatPage> {
         height: double.infinity,
         child: Column(
           children: [
-            // 🔹 Cabeçalho centralizado
             Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 10),
               child: Center(
@@ -72,7 +152,6 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
 
-            // 🔹 Área das mensagens
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -121,7 +200,6 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
 
-            // 🔹 "Digitando..." (acima do input)
             if (_isTyping)
               Padding(
                 padding:
@@ -148,7 +226,6 @@ class _ChatPageState extends State<ChatPage> {
                 ),
               ),
 
-            // 🔹 Campo de mensagem ocupando toda a largura
             SafeArea(
               child: Container(
                 width: double.infinity,
