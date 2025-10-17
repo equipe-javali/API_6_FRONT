@@ -21,11 +21,11 @@ class AppMenu extends StatelessWidget {
                 //   title: 'Home',
                 //   route: '/home',
                 // ),
-                // _MenuItem(
-                //   icon: Icons.chat_outlined,
-                //   title: 'Chat',
-                //   route: '/chat',
-                // ),
+                _MenuItem(
+                  icon: Icons.chat_outlined,
+                  title: 'Chat',
+                  route: '/chat',
+                ),
                 _MenuItem(
                   icon: Icons.people_outline,
                   title: 'Usuários',

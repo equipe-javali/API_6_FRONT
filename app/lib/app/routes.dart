@@ -4,6 +4,8 @@ import 'package:app/pages/login.dart';
 // import 'package:app/pages/chat.dart';
 import 'package:app/pages/listar_usuarios.dart';
 import 'package:app/pages/cadastrar_usuario.dart';
+import 'package:app/pages/chat.dart';
+
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/login',
@@ -16,10 +18,10 @@ final GoRouter appRouter = GoRouter(
     //   path: '/home',
     //   builder: (context, state) => const HomePage(),
     // ),
-    // GoRoute(
-    //   path: '/chat',
-    //   builder: (context, state) => const ChatPage(),
-    // ),
+    GoRoute(
+      path: '/chat',
+       builder: (context, state) => const ChatPage(),
+    ),
     GoRoute(
       path: '/usuarios',
       builder: (context, state) => const ListarUsuariosPage(),
