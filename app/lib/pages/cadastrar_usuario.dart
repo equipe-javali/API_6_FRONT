@@ -18,6 +18,8 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
   bool _receberRelatorio = false;
   bool _isLoading = false;
 
+  String _tipoUsuario = 'usuario'; // Valor padrão do dropdown
+
   @override
   void dispose() {
     _nomeController.dispose();
@@ -39,9 +41,11 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
             'Content-Type': 'application/json',
           },
           body: jsonEncode({
+            'nome': _nomeController.text.trim(),
             'email': _emailController.text.trim(),
             'senha': _senhaController.text,
             'recebe_boletim': _receberRelatorio,
+            'tipo': _tipoUsuario, // novo campo
           }),
         );
 
@@ -49,7 +53,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
 
         if (!mounted) return;
         if (response.statusCode == 200 && data['success'] == true) {
-          // Sucesso - mostrar mensagem e limpar campos
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
@@ -58,15 +61,14 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
             ),
           );
 
-          // Limpar os campos
           _nomeController.clear();
           _emailController.clear();
           _senhaController.clear();
           setState(() {
             _receberRelatorio = false;
+            _tipoUsuario = 'usuario';
           });
         } else {
-          // Erro - mostrar mensagem de erro
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(data['message'] ??
@@ -113,14 +115,15 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
 
   @override
   Widget build(BuildContext context) {
+    const roxo = Color(0xFF9B8DF7);
+
     return AppScaffold(
       title: 'Criar Usuário',
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -134,9 +137,10 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                           decoration: const InputDecoration(
                             labelText: 'Nome',
                           ),
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Informe o nome'
-                              : null,
+                          validator: (value) =>
+                              value == null || value.isEmpty
+                                  ? 'Informe o nome'
+                                  : null,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
@@ -157,9 +161,10 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                             decoration: const InputDecoration(
                               labelText: 'Nome',
                             ),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Informe o nome'
-                                : null,
+                            validator: (value) =>
+                                value == null || value.isEmpty
+                                    ? 'Informe o nome'
+                                    : null,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -177,7 +182,10 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                   }
                 },
               ),
+
               const SizedBox(height: 16),
+
+              // Senha + Relatório + Tipo de Usuário
               LayoutBuilder(
                 builder: (context, constraints) {
                   bool isMobile = constraints.maxWidth < 600;
@@ -194,15 +202,42 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                           validator: _validatePassword,
                         ),
                         const SizedBox(height: 16),
+
+                        // Tipo de usuário
+                        DropdownButtonFormField<String>(
+                          value: _tipoUsuario,
+                          decoration: const InputDecoration(
+                            labelText: 'Tipo de Usuário',
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'usuario',
+                              child: Text('Usuário comum'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'admin',
+                              child: Text('Administrador'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _tipoUsuario = value!;
+                            });
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Switch de relatório
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text('Receber relatório',
-                                style: TextStyle(color: Color(0xFF9B8DF7))),
+                                style: TextStyle(color: roxo)),
                             const SizedBox(width: 8),
                             Switch(
                               value: _receberRelatorio,
-                              activeColor: const Color(0xFF9B8DF7),
+                              activeColor: roxo,
                               onChanged: _isLoading
                                   ? null
                                   : (value) {
@@ -220,7 +255,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
-                          width: 487,
+                          width: 300,
                           child: TextFormField(
                             controller: _senhaController,
                             obscureText: true,
@@ -230,17 +265,42 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                             validator: _validatePassword,
                           ),
                         ),
-                        const SizedBox(width: 32),
+                        const SizedBox(width: 24),
+                        SizedBox(
+                          width: 250,
+                          child: DropdownButtonFormField<String>(
+                            value: _tipoUsuario,
+                            decoration: const InputDecoration(
+                              labelText: 'Tipo de Usuário',
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'usuario',
+                                child: Text('Usuário comum'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'admin',
+                                child: Text('Administrador'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _tipoUsuario = value!;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 24),
                         Padding(
                           padding: const EdgeInsets.only(top: 12.0),
                           child: Row(
                             children: [
                               const Text('Receber relatório',
-                                  style: TextStyle(color: Color(0xFF9B8DF7))),
+                                  style: TextStyle(color: roxo)),
                               const SizedBox(width: 8),
                               Switch(
                                 value: _receberRelatorio,
-                                activeColor: const Color(0xFF9B8DF7),
+                                activeColor: roxo,
                                 onChanged: _isLoading
                                     ? null
                                     : (value) {
@@ -257,16 +317,31 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                   }
                 },
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 28),
+
+              // Botão
               SizedBox(
-                width: 210,
+                width: 220,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _adicionarUsuario,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7968D8),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text('Adicionar'),
                 ),
