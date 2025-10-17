@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:app/widgets/app_scaffold.dart';
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:app/widgets/app_scaffold.dart';
 import 'package:app/services/auth_service.dart';
 
 class ChatPage extends StatefulWidget {
@@ -19,12 +20,14 @@ class _ChatPageState extends State<ChatPage> {
   final AuthService _authService = AuthService();
   int? _userId;
 
+  // 🎨 Paleta e estilo base
   final color1 = const Color(0xFF23232C);
   final color2 = const Color(0xFF7968D8);
   final color3 = const Color(0xFF1F1E23);
-  final color4 = const Color(0xFF5c5769);
+  final color4 = const Color(0xFF5C5769);
   final fontSize = 18.0;
 
+  /// Envia a mensagem para o backend e gerencia a resposta
   void _sendMessage() {
     _sendMessageToBackend();
   }
@@ -39,8 +42,17 @@ class _ChatPageState extends State<ChatPage> {
         'isUser': true,
         'time': DateTime.now(),
       });
+
+      // Mostra "digitando..."
       _isTyping = true;
+      _messages.add({
+        'text': 'Digitando...',
+        'isUser': false,
+        'time': DateTime.now(),
+        'temporary': true,
+      });
     });
+
     _controller.clear();
 
     try {
@@ -48,6 +60,7 @@ class _ChatPageState extends State<ChatPage> {
       if (token == null) {
         setState(() {
           _isTyping = false;
+          _removeTemporaryTyping();
           _messages.add({
             'text': 'Erro: usuário não autenticado',
             'isUser': false,
@@ -78,7 +91,10 @@ class _ChatPageState extends State<ChatPage> {
         body: body,
       );
 
-      setState(() => _isTyping = false);
+      setState(() {
+        _isTyping = false;
+        _removeTemporaryTyping(); // remove "Digitando..."
+      });
 
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
@@ -102,6 +118,7 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       setState(() {
         _isTyping = false;
+        _removeTemporaryTyping();
         _messages.add({
           'text': 'Exceção: $e',
           'isUser': false,
@@ -111,6 +128,12 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  /// Remove a mensagem temporária "Digitando..."
+  void _removeTemporaryTyping() {
+    _messages.removeWhere((m) => m['temporary'] == true);
+  }
+
+  /// Obtém o usuário atual
   Future<void> _loadCurrentUser(String token) async {
     try {
       final url = Uri.parse('${_authService.baseUrl}/users/me/');
@@ -152,6 +175,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
 
+            // 💬 Lista de mensagens
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -159,15 +183,26 @@ class _ChatPageState extends State<ChatPage> {
                 itemBuilder: (context, index) {
                   final msg = _messages[index];
                   final isUser = msg['isUser'] as bool;
+                  final isTemporary = msg['temporary'] == true;
                   final time = DateFormat('HH:mm').format(msg['time']);
 
+                  // Se for a mensagem "digitando..."
+                  if (isTemporary) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: TypingBubble(
+                        color2: color2,
+                        color4: color4,
+                      ),
+                    );
+                  }
+
+                  // Mensagens normais
                   return Align(
-                    alignment:
-                        isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 6),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                       decoration: BoxDecoration(
                         color: isUser ? color3 : const Color(0xFF2A2A35),
                         border: Border.all(color: color2.withOpacity(0.4)),
@@ -200,38 +235,12 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
 
-            if (_isTyping)
-              Padding(
-                padding:
-                    const EdgeInsets.only(left: 16, right: 16, bottom: 6, top: 2),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    width: double.infinity,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: color3,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'Digitando...',
-                      style: TextStyle(
-                        color: color4.withOpacity(0.8),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
+            // ✍️ Campo de envio
             SafeArea(
               child: Container(
                 width: double.infinity,
                 color: color3,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -248,8 +257,7 @@ class _ChatPageState extends State<ChatPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: color2, width: 1.5),
+                            borderSide: BorderSide(color: color2, width: 1.5),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
@@ -268,6 +276,73 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 💫 Widget da bolha "Digitando..."
+class TypingBubble extends StatefulWidget {
+  final Color color2;
+  final Color color4;
+
+  const TypingBubble({super.key, required this.color2, required this.color4});
+
+  @override
+  State<TypingBubble> createState() => _TypingBubbleState();
+}
+
+class _TypingBubbleState extends State<TypingBubble>
+    with SingleTickerProviderStateMixin {
+  int dotCount = 1;
+  late final Timer _timer;
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Animação dos "..."
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      setState(() => dotCount = (dotCount % 3) + 1);
+    });
+
+    // Efeito "respirando" (fade in/out)
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dots = '.' * dotCount;
+
+    return FadeTransition(
+      opacity: Tween(begin: 0.6, end: 1.0).animate(_controller),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        decoration: BoxDecoration(
+          color: widget.color2.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: widget.color2.withOpacity(0.3)),
+        ),
+        constraints: const BoxConstraints(maxWidth: 200),
+        child: Text(
+          'Digitando$dots',
+          style: TextStyle(
+            color: widget.color4.withOpacity(0.8),
+            fontStyle: FontStyle.italic,
+          ),
         ),
       ),
     );
