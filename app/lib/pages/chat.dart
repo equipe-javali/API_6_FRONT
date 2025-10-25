@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:app/widgets/app_scaffold.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -16,9 +18,24 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
+  final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
   final AuthService _authService = AuthService();
   int? _userId;
+  
+  List<Map<String, dynamic>> _groupedMessages() {
+  final Map<DateTime, List<Map<String, dynamic>>> groups = {};
+  for (var msg in _messages) {
+    final time = msg['time'] as DateTime;
+    final key = DateTime(time.year, time.month, time.day);
+    groups.putIfAbsent(key, () => []).add(msg);
+  }
+
+  final sortedKeys = groups.keys.toList()..sort();
+  return sortedKeys
+      .map((key) => {'date': key, 'messages': groups[key]!})
+      .toList();
+}
 
   // 🎨 Paleta e estilo base
   final color1 = const Color(0xFF23232C);
@@ -30,6 +47,32 @@ class _ChatPageState extends State<ChatPage> {
   /// Envia a mensagem para o backend e gerencia a resposta
   void _sendMessage() {
     _sendMessageToBackend();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Load token, user and message history after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await initializeDateFormatting('pt_BR', null);
+      } catch (e) {
+        // If initialization fails, we'll fall back to numeric date format
+        print('Falha ao inicializar locale pt_BR: $e');
+      }
+      final token = await _authService.getToken();
+      if (token != null) {
+        await _loadCurrentUser(token);
+        await _loadMessageHistory();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _sendMessageToBackend() async {
@@ -52,6 +95,7 @@ class _ChatPageState extends State<ChatPage> {
         'temporary': true,
       });
     });
+    _scrollToBottom();
 
     _controller.clear();
 
@@ -106,6 +150,7 @@ class _ChatPageState extends State<ChatPage> {
             'time': DateTime.now(),
           });
         });
+        _scrollToBottom();
       } else {
         setState(() {
           _messages.add({
@@ -126,6 +171,176 @@ class _ChatPageState extends State<ChatPage> {
         });
       });
     }
+  }
+
+  /// Carrega histórico de mensagens do usuário e popula _messages
+  Future<void> _loadMessageHistory() async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return;
+
+      if (_userId == null) {
+        await _loadCurrentUser(token);
+        if (_userId == null) return;
+      }
+
+      final url = Uri.parse('${_authService.baseUrl}/users/mensagens/$_userId');
+      final resp = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        if (data is List) {
+          // Map backend messages to local format
+          final List<Map<String, dynamic>> loaded = data.map<Map<String, dynamic>>((m) {
+            final isIa = m['ia'] == true || (m['ia'] is int && m['ia'] == 1);
+            DateTime time;
+            try {
+              time = m['envio'] != null ? DateTime.parse(m['envio']) : DateTime.now();
+            } catch (_) {
+              time = DateTime.now();
+            }
+
+            return {
+              'text': m['mensagem'] ?? '',
+              'isUser': !isIa, // user message when ia == false
+              'time': time,
+            };
+          }).toList();
+
+          // Sort by time ascending
+          loaded.sort((a, b) => (a['time'] as DateTime).compareTo(b['time'] as DateTime));
+
+          setState(() {
+            _messages.clear();
+            _messages.addAll(loaded);
+          });
+
+          // wait a frame and scroll to bottom
+          _scrollToBottom();
+        }
+      } else {
+        print('Falha ao carregar mensagens: ${resp.statusCode} ${resp.body}');
+      }
+    } catch (e) {
+      print('Erro ao carregar histórico: $e');
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  bool _isYesterday(DateTime date) {
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    return _isSameDay(date, yesterday);
+  }
+
+  String _formatDateHeader(DateTime date) {
+    final now = DateTime.now();
+    if (_isSameDay(date, now)) return 'Hoje';
+    if (_isYesterday(date)) return 'Ontem';
+    // Ex: 17 de outubro de 2025
+    try {
+      return DateFormat("d 'de' MMMM 'de' y", 'pt_BR').format(date);
+    } catch (_) {
+      return DateFormat('yyyy-MM-dd').format(date);
+    }
+  }
+
+  List<Widget> _buildMessageList() {
+    final List<Widget> widgets = [];
+    DateTime? lastDate;
+
+    for (var i = 0; i < _messages.length; i++) {
+      final msg = _messages[i];
+      final isUser = msg['isUser'] as bool;
+      final isTemporary = msg['temporary'] == true;
+      final DateTime time = msg['time'] as DateTime;
+
+      // insert date header when day changes
+      if (lastDate == null || !_isSameDay(lastDate, time)) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: color2.withOpacity(0.16),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _formatDateHeader(time),
+                  style: TextStyle(color: color2, fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
+        );
+        lastDate = time;
+      }
+
+      // typing bubble
+      if (isTemporary) {
+        widgets.add(
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TypingBubble(color2: color2, color4: color4),
+          ),
+        );
+        continue;
+      }
+
+      // normal message bubble
+      widgets.add(
+        Align(
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            decoration: BoxDecoration(
+              color: isUser ? color3 : const Color(0xFF2A2A35),
+              border: Border.all(color: color2.withOpacity(0.4)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            constraints: const BoxConstraints(maxWidth: 300),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  msg['text'],
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    DateFormat('HH:mm').format(time),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widgets;
   }
 
   /// Remove a mensagem temporária "Digitando..."
@@ -176,64 +391,89 @@ class _ChatPageState extends State<ChatPage> {
             ),
 
             // 💬 Lista de mensagens
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final msg = _messages[index];
-                  final isUser = msg['isUser'] as bool;
-                  final isTemporary = msg['temporary'] == true;
-                  final time = DateFormat('HH:mm').format(msg['time']);
+                    Expanded(
+  child: ListView.builder(
+    controller: _scrollController,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    itemCount: _groupedMessages().length,
+    itemBuilder: (context, index) {
+      final group = _groupedMessages()[index];
+      final date = group['date'] as DateTime;
+      final messages = group['messages'] as List<Map<String, dynamic>>;
 
-                  // Se for a mensagem "digitando..."
-                  if (isTemporary) {
-                    return Align(
-                      alignment: Alignment.centerLeft,
-                      child: TypingBubble(
-                        color2: color2,
-                        color4: color4,
-                      ),
-                    );
-                  }
-
-                  // Mensagens normais
-                  return Align(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                      decoration: BoxDecoration(
-                        color: isUser ? color3 : const Color(0xFF2A2A35),
-                        border: Border.all(color: color2.withOpacity(0.4)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      constraints: const BoxConstraints(maxWidth: 300),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            msg['text'],
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 4),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Text(
-                              time,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+      return StickyHeader(
+        header: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          color: color1,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: color2.withOpacity(0.16),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _formatDateHeader(date),
+                style: TextStyle(
+                  color: color2,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
+          ),
+        ),
+        content: Column(
+          children: messages.map((msg) {
+            final isUser = msg['isUser'] as bool;
+            final isTemporary = msg['temporary'] == true;
+            final time = DateFormat('HH:mm').format(msg['time']);
+
+            if (isTemporary) {
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: TypingBubble(color2: color2, color4: color4),
+              );
+            }
+
+            return Align(
+              alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                decoration: BoxDecoration(
+                  color: isUser ? color3 : const Color(0xFF2A2A35),
+                  border: Border.all(color: color2.withOpacity(0.4)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(msg['text'], style: const TextStyle(color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        time,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.5),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    },
+  ),
+),
 
             // ✍️ Campo de envio
             SafeArea(
