@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app/widgets/app_scaffold.dart';
+import 'package:app/services/auth_service.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -18,7 +19,16 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
   bool _receberRelatorio = false;
   bool _isLoading = false;
 
-  String _tipoUsuario = 'usuario'; // Valor padrão do dropdown
+  final AuthService _authService = AuthService();
+  int? _userId;
+  List<String> _tipos = [];
+  String? _tipoUsuario;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarTiposUsuario();
+  }
 
   @override
   void dispose() {
@@ -26,6 +36,56 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
     _emailController.dispose();
     _senhaController.dispose();
     super.dispose();
+  }
+
+  Future<void> _carregarTiposUsuario() async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return;
+
+      final urlUser = Uri.parse('${_authService.baseUrl}/users/me/');
+      final respUser = await http.get(urlUser, headers: {
+        'Authorization': 'Bearer $token',
+      });
+
+      if (respUser.statusCode == 200) {
+        final dataUser = jsonDecode(respUser.body);
+        _userId = dataUser['id'];
+
+        final urlTipo =
+            Uri.parse('${_authService.baseUrl}/users/tipo/$_userId');
+        final respTipo = await http.get(urlTipo, headers: {
+          'Authorization': 'Bearer $token',
+        });
+
+        if (respTipo.statusCode == 200) {
+          final body = jsonDecode(respTipo.body);
+          final tipos = (body is List)
+              ? List<String>.from(body)
+              : (body is String && body.isNotEmpty)
+                  ? [body]
+                  : <String>[];
+
+          setState(() {
+            _tipos = tipos.isNotEmpty
+                ? tipos
+                : ['Não encontrado'];
+            _tipoUsuario = _tipos.first;
+          });
+        } else {
+          setState(() {
+            _tipos = ['Não encontrado'];
+            _tipoUsuario = _tipos.first;
+          });
+        }
+      }
+    } catch (e) {
+      print('Erro ao carregar tipos: $e');
+      setState(() {
+        _tipos = ['Não encontrado'];
+        _tipoUsuario = _tipos.first;
+      });
+    }
   }
 
   Future<void> _adicionarUsuario() async {
@@ -45,7 +105,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
             'email': _emailController.text.trim(),
             'senha': _senhaController.text,
             'recebe_boletim': _receberRelatorio,
-            'tipo': _tipoUsuario, // novo campo
+            'tipo': _tipoUsuario,
           }),
         );
 
@@ -66,7 +126,9 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           _senhaController.clear();
           setState(() {
             _receberRelatorio = false;
-            _tipoUsuario = 'usuario';
+            _tipoUsuario = _tipos.isNotEmpty
+                ? _tipos.first
+                : 'Nenhum tipo de usuário encontrado';
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -119,11 +181,11 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
 
     return AppScaffold(
       title: 'Criar Usuário',
-      child: Padding(
+      child: SingleChildScrollView( // ✅ evita overflow
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -185,10 +247,27 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
 
               const SizedBox(height: 16),
 
-              // Senha + Relatório + Tipo de Usuário
               LayoutBuilder(
                 builder: (context, constraints) {
                   bool isMobile = constraints.maxWidth < 600;
+
+                  final tipoDropdown = DropdownButtonFormField<String>(
+                    value: _tipoUsuario,
+                    decoration: const InputDecoration(
+                      labelText: 'Tipo de Usuário',
+                    ),
+                    items: _tipos
+                        .map((tipo) => DropdownMenuItem(
+                              value: tipo,
+                              child: Text(tipo),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _tipoUsuario = value!;
+                      });
+                    },
+                  );
 
                   if (isMobile) {
                     return Column(
@@ -202,38 +281,15 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                           validator: _validatePassword,
                         ),
                         const SizedBox(height: 16),
-
-                        // Tipo de usuário
-                        DropdownButtonFormField<String>(
-                          value: _tipoUsuario,
-                          decoration: const InputDecoration(
-                            labelText: 'Tipo de Usuário',
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'usuario',
-                              child: Text('Usuário comum'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'admin',
-                              child: Text('Administrador'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _tipoUsuario = value!;
-                            });
-                          },
-                        ),
-
+                        tipoDropdown,
                         const SizedBox(height: 16),
-
-                        // Switch de relatório
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Receber relatório',
-                                style: TextStyle(color: roxo)),
+                            const Text(
+                              'Receber relatório',
+                              style: TextStyle(color: roxo),
+                            ),
                             const SizedBox(width: 8),
                             Switch(
                               value: _receberRelatorio,
@@ -266,37 +322,16 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                           ),
                         ),
                         const SizedBox(width: 24),
-                        SizedBox(
-                          width: 250,
-                          child: DropdownButtonFormField<String>(
-                            value: _tipoUsuario,
-                            decoration: const InputDecoration(
-                              labelText: 'Tipo de Usuário',
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'usuario',
-                                child: Text('Usuário comum'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'admin',
-                                child: Text('Administrador'),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _tipoUsuario = value!;
-                              });
-                            },
-                          ),
-                        ),
+                        SizedBox(width: 250, child: tipoDropdown),
                         const SizedBox(width: 24),
                         Padding(
                           padding: const EdgeInsets.only(top: 12.0),
                           child: Row(
                             children: [
-                              const Text('Receber relatório',
-                                  style: TextStyle(color: roxo)),
+                              const Text(
+                                'Receber relatório',
+                                style: TextStyle(color: roxo),
+                              ),
                               const SizedBox(width: 8),
                               Switch(
                                 value: _receberRelatorio,
@@ -320,7 +355,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
 
               const SizedBox(height: 28),
 
-              // Botão
               SizedBox(
                 width: 220,
                 child: ElevatedButton(
