@@ -24,18 +24,19 @@ class _ChatPageState extends State<ChatPage> {
   int? _userId;
   
   List<Map<String, dynamic>> _groupedMessages() {
-  final Map<DateTime, List<Map<String, dynamic>>> groups = {};
-  for (var msg in _messages) {
-    final time = msg['time'] as DateTime;
-    final key = DateTime(time.year, time.month, time.day);
-    groups.putIfAbsent(key, () => []).add(msg);
-  }
+    // Agrupa por dia do calendário LOCAL para evitar problemas de UTC
+    final Map<DateTime, List<Map<String, dynamic>>> groups = {};
+    for (var msg in _messages) {
+      final time = (msg['time'] as DateTime).toLocal();
+      final key = DateTime(time.year, time.month, time.day);
+      groups.putIfAbsent(key, () => []).add(msg);
+    }
 
-  final sortedKeys = groups.keys.toList()..sort();
-  return sortedKeys
-      .map((key) => {'date': key, 'messages': groups[key]!})
-      .toList();
-}
+    final sortedKeys = groups.keys.toList()..sort();
+    return sortedKeys
+        .map((key) => {'date': key, 'messages': groups[key]!})
+        .toList();
+  }
 
   // 🎨 Paleta e estilo base
   final color1 = const Color(0xFF23232C);
@@ -194,7 +195,25 @@ class _ChatPageState extends State<ChatPage> {
             final isIa = m['ia'] == true || (m['ia'] is int && m['ia'] == 1);
             DateTime time;
             try {
-              time = m['envio'] != null ? DateTime.parse(m['envio']) : DateTime.now();
+              // Normaliza para horário LOCAL com suporte para várias formas (string com/sem TZ, epoch)
+              final raw = m['envio'];
+              if (raw == null) {
+                time = DateTime.now();
+              } else if (raw is String) {
+                // Se a string não tiver timezone, assumimos UTC e adicionamos 'Z' quando necessário
+                final tzRegex = RegExp(r"(Z|[+-]\d{2}:?\d{2})$");
+                final hasTz = tzRegex.hasMatch(raw);
+                final parsed = hasTz
+                    ? DateTime.parse(raw)
+                    : DateTime.parse(raw.endsWith('Z') ? raw : '${raw}Z');
+                time = parsed.toLocal();
+              } else if (raw is num) {
+                // Caso venha epoch (segundos ou milissegundos)
+                final millis = raw > 1e12 ? raw.toInt() : (raw * 1000).toInt();
+                time = DateTime.fromMillisecondsSinceEpoch(millis, isUtc: true).toLocal();
+              } else {
+                time = DateTime.now();
+              }
             } catch (_) {
               time = DateTime.now();
             }
@@ -237,12 +256,20 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  DateTime _dateOnlyLocal(DateTime dt) {
+    final l = dt.toLocal();
+    return DateTime(l.year, l.month, l.day);
+  }
+
   bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+    final da = _dateOnlyLocal(a);
+    final db = _dateOnlyLocal(b);
+    return da.year == db.year && da.month == db.month && da.day == db.day;
   }
 
   bool _isYesterday(DateTime date) {
-    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    final today = _dateOnlyLocal(DateTime.now());
+    final yesterday = today.subtract(const Duration(days: 1));
     return _isSameDay(date, yesterday);
   }
 
@@ -252,9 +279,9 @@ class _ChatPageState extends State<ChatPage> {
     if (_isYesterday(date)) return 'Ontem';
     // Ex: 17 de outubro de 2025
     try {
-      return DateFormat("d 'de' MMMM 'de' y", 'pt_BR').format(date);
+      return DateFormat("d 'de' MMMM 'de' y", 'pt_BR').format(date.toLocal());
     } catch (_) {
-      return DateFormat('yyyy-MM-dd').format(date);
+      return DateFormat('yyyy-MM-dd').format(date.toLocal());
     }
   }
 
@@ -326,7 +353,7 @@ class _ChatPageState extends State<ChatPage> {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Text(
-                    DateFormat('HH:mm').format(time),
+                    DateFormat('HH:mm').format(time.toLocal()),
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.5),
                       fontSize: 11,
@@ -426,9 +453,9 @@ class _ChatPageState extends State<ChatPage> {
         ),
         content: Column(
           children: messages.map((msg) {
-            final isUser = msg['isUser'] as bool;
-            final isTemporary = msg['temporary'] == true;
-            final time = DateFormat('HH:mm').format(msg['time']);
+      final isUser = msg['isUser'] as bool;
+      final isTemporary = msg['temporary'] == true;
+      final time = DateFormat('HH:mm').format((msg['time'] as DateTime).toLocal());
 
             if (isTemporary) {
               return Align(
