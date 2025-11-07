@@ -31,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => isLoading = false);
 
     if (!mounted) return;
+
     if (token != null) {
       context.go('/usuarios');
     } else {
@@ -44,103 +45,106 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
-      body: Center(
-        child: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.auto_awesome,
-                      color: Color(0xFF9C7BFF), size: 64),
-                  const SizedBox(height: 40),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isMobile = constraints.maxWidth < 600;
 
-                  // Email
-                  TextField(
-                    controller: emailController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.mail_outline,
-                          color: Color(0xFF9C7BFF)),
-                      labelText: "Email",
-                      labelStyle:
-                          GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color(0xFF9C7BFF), width: 2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Senha
-                  TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      prefixIcon:
-                          const Icon(Icons.vpn_key, color: Color(0xFF9C7BFF)),
-                      labelText: "Senha",
-                      labelStyle:
-                          GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color(0xFF9C7BFF), width: 2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Botão
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF9C7BFF),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: isLoading
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                          : Text(
-                              "Entrar",
-                              style: GoogleFonts.comfortaa(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                    ),
-                  ),
-
-                  if (errorMessage != null) ...[
-                    const SizedBox(height: 16),
-                    Text(errorMessage!,
-                        style: const TextStyle(color: Colors.red)),
-                  ],
-                ],
+          return Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 24 : 40,
+                vertical: isMobile ? 20 : 40,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isMobile ? 360 : 420, 
+                ),
+                child: _buildForm(isMobile),
               ),
             ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildForm(bool isMobile) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.auto_awesome,
+          color: const Color(0xFF9C7BFF),
+          size: isMobile ? 60 : 72,
+        ),
+        const SizedBox(height: 40),
+
+        // EMAIL
+        TextField(
+          controller: emailController,
+          style: const TextStyle(color: Colors.white),
+          decoration: _inputDecoration("Email", Icons.mail_outline),
+        ),
+        const SizedBox(height: 16),
+
+        // SENHA
+        TextField(
+          controller: passwordController,
+          obscureText: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: _inputDecoration("Senha", Icons.vpn_key),
+        ),
+        const SizedBox(height: 30),
+
+        // BOTÃO ENTRAR
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: isLoading ? null : _login,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF9C7BFF),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: isLoading
+                ? const CircularProgressIndicator(color: Colors.white)
+                : Text(
+                    "Entrar",
+                    style: GoogleFonts.comfortaa(
+                      color: Colors.white,
+                      fontSize: isMobile ? 15 : 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
           ),
         ),
+
+        if (errorMessage != null) ...[
+          const SizedBox(height: 16),
+          Text(
+            errorMessage!,
+            style: const TextStyle(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      prefixIcon: Icon(icon, color: const Color(0xFF9C7BFF)),
+      labelText: label,
+      labelStyle: GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Color(0xFF9C7BFF), width: 2),
+        borderRadius: BorderRadius.circular(8),
       ),
     );
   }
