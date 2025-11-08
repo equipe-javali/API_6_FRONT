@@ -5,7 +5,7 @@ import 'package:app/pages/login.dart';
 import 'package:app/pages/listar_usuarios.dart';
 import 'package:app/pages/cadastrar_usuario.dart';
 import 'package:app/pages/chat.dart';
-
+import 'package:app/pages/recuperar_senha.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/login',
@@ -20,7 +20,7 @@ final GoRouter appRouter = GoRouter(
     // ),
     GoRoute(
       path: '/chat',
-       builder: (context, state) => const ChatPage(),
+      builder: (context, state) => const ChatPage(),
     ),
     GoRoute(
       path: '/usuarios',
@@ -29,6 +29,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/cadastrar/usuario',
       builder: (context, state) => const CadastrarUsuarioPage(),
+    ),
+    GoRoute(
+      path: '/recuperar-senha',
+      builder: (context, state) => const RecuperarSenhaPage(),
     ),
   ],
 );
