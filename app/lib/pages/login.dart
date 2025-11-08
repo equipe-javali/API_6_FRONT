@@ -57,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: isMobile ? 360 : 420, 
+                  maxWidth: isMobile ? 360 : 420,
                 ),
                 child: _buildForm(isMobile),
               ),
@@ -94,7 +94,23 @@ class _LoginPageState extends State<LoginPage> {
           style: const TextStyle(color: Colors.white),
           decoration: _inputDecoration("Senha", Icons.vpn_key),
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 10),
+
+        // ✅ LINK "ESQUECI MINHA SENHA"
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () => context.go('/recuperar-senha'),
+            child: Text(
+              'Esqueci minha senha',
+              style: GoogleFonts.comfortaa(
+                color: const Color(0xFF9C7BFF),
+                fontSize: isMobile ? 13 : 14,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
 
         // BOTÃO ENTRAR
         SizedBox(
