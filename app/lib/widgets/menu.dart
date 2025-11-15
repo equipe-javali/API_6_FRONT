@@ -33,15 +33,15 @@ class _AppMenuState extends State<AppMenu> {
                   icon: Icons.people_outline,
                   title: 'Usuários',
                   route: '/usuarios',
-                  helpText: 'Visualize e gerencie a lista de usuários do sistema.',
-                  showHelp: _showHelp,
+                  // helpText: 'Veja a lista de usuários e gerencie permissões.',
+                  // showHelp: _showHelp,
                 ),
                 _MenuItem(
                   icon: Icons.person_add_outlined,
                   title: 'Cadastrar Usuário',
                   route: '/cadastrar/usuario',
-                  helpText: 'Adicione um novo usuário preenchendo os dados necessários.',
-                  showHelp: _showHelp,
+                  // helpText: 'Crie um novo usuário preenchendo os campos necessários.',
+                  // showHelp: _showHelp,
                 ),
                 const Divider(color: AppTheme.borderColor),
                 _MenuItem(
@@ -49,12 +49,13 @@ class _AppMenuState extends State<AppMenu> {
                   title: 'Sair',
                   route: '/login',
                   isLogout: true,
-                  helpText: 'Encerre a sessão atual e volte para a tela de login.',
+                  helpText: 'Saia da aplicação e volte para a tela de login.',
                   showHelp: _showHelp,
                 ),
               ],
             ),
           ),
+
           // Rodapé com botão de ajuda no canto esquerdo
           SafeArea(
             minimum: const EdgeInsets.all(12),
@@ -75,46 +76,6 @@ class _AppMenuState extends State<AppMenu> {
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HelpBalloon extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-
-  const _HelpBalloon({super.key, required this.icon, required this.title, required this.description});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.backgroundColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.borderColor),
-            ),
-            child: Icon(icon, size: 20, color: AppTheme.primaryColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(description, style: const TextStyle(color: AppTheme.textSecondaryColor)),
-              ],
             ),
           ),
         ],
@@ -152,13 +113,18 @@ class _MenuItemState extends State<_MenuItem> {
   void didUpdateWidget(covariant _MenuItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.showHelp && !oldWidget.showHelp) {
-      // Aguarda o próximo frame para garantir que o RenderBox esteja disponível
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         try {
-          _insertOverlay();
-        } catch (e) {
-          // Falha ao inserir overlay — evita crash da UI
+          final isDesktop = MediaQuery.of(context).size.width >= 600;
+          if (isDesktop) {
+            _insertOverlay();
+          } else {
+            // Em mobile apenas rebuild para mostrar balão inline
+            setState(() {});
+          }
+        } catch (_) {
+          // ignora erros de overlay
         }
       });
     } else if (!widget.showHelp && oldWidget.showHelp) {
@@ -175,7 +141,7 @@ class _MenuItemState extends State<_MenuItem> {
     final offset = renderBox.localToGlobal(Offset.zero);
 
     _overlayEntry = OverlayEntry(builder: (context) {
-      double top = offset.dy + (size.height / 2) - 22; // attempt to center tooltip vertically
+      double top = offset.dy + (size.height / 2) - 22;
       if (top < 8) top = 8;
       return Positioned(
         left: offset.dx + size.width + 8,
@@ -190,7 +156,7 @@ class _MenuItemState extends State<_MenuItem> {
     try {
       final overlay = Overlay.of(context, rootOverlay: true) ?? Overlay.of(context);
       overlay?.insert(_overlayEntry!);
-    } catch (e) {
+    } catch (_) {
       _overlayEntry = null;
     }
   }
@@ -210,6 +176,7 @@ class _MenuItemState extends State<_MenuItem> {
   Widget build(BuildContext context) {
     final currentRoute = GoRouterState.of(context).matchedLocation;
     final isActive = currentRoute == widget.route && !widget.isLogout;
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Container(
       key: _itemKey,
@@ -218,24 +185,72 @@ class _MenuItemState extends State<_MenuItem> {
         color: isActive ? AppTheme.primaryColor.withAlpha((0.1 * 255).round()) : null,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: ListTile(
-        leading: Icon(
-          widget.icon,
-          color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: Icon(
+              widget.icon,
+              color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
+            ),
+            title: isMobile && widget.showHelp && widget.helpText != null
+                ? _HelpTooltipMobile(text: widget.helpText!)
+                : Text(
+                    widget.title,
+                    style: TextStyle(
+                      color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+            onTap: () {
+              _removeOverlay();
+              Navigator.of(context).pop();
+              context.go(widget.route);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HelpTooltipMobile extends StatelessWidget {
+  final String text;
+
+  const _HelpTooltipMobile({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // seta triangular apontando para a esquerda
+        CustomPaint(
+          size: const Size(12, 36),
+          painter: _TrianglePainter(color: Colors.white),
         ),
-        title: Text(
-          widget.title,
-          style: TextStyle(
-            color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+        Flexible(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
           ),
         ),
-        onTap: () {
-          _removeOverlay();
-          Navigator.of(context).pop(); // Fechar o drawer
-          context.go(widget.route);
-        },
-      ),
+      ],
     );
   }
 }
@@ -250,7 +265,6 @@ class _HelpTooltip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // seta triangular apontando para a esquerda
         CustomPaint(
           size: const Size(12, 28),
           painter: _TrianglePainter(color: Colors.white),
@@ -287,6 +301,7 @@ class _TrianglePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color;
     final path = Path();
+
     // triangle pointing left, centered vertically
     path.moveTo(size.width, size.height / 2 - 6);
     path.lineTo(0, size.height / 2);
