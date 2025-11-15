@@ -3,11 +3,11 @@ frontend:
   phases:
     preBuild:
       commands:
-        - apt-get update && apt-get install -y xz-utils
-        - wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.4-stable.tar.xz
+        - wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.1-stable.tar.xz
+        - apt-get update && apt-get install -y xz-utils || true
         - tar xf flutter_linux_*.tar.xz
         - export PATH="$PATH:`pwd`/flutter/bin"
-        - flutter doctor
+        - flutter doctor -v
         - flutter pub get
     build:
       commands:
