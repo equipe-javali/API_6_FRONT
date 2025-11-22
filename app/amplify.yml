@@ -16,8 +16,7 @@ frontend:
         - cd app
         - flutter pub get
     build:
-      commands:
-        - cd app
+      commands:     
         - flutter build web --release
   artifacts:
     baseDirectory: app/build/web
