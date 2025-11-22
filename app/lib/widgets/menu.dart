@@ -26,17 +26,18 @@ class _AppMenuState extends State<AppMenu> {
                   icon: Icons.chat_outlined,
                   title: 'Chat',
                   route: '/chat',
-                  helpText: 'Abra o chat para conversar com o agente e acompanhar conversas.',
+                  helpText:
+                      'Abra o chat para conversar com o agente e acompanhar conversas.',
                   showHelp: _showHelp,
                 ),
-                _MenuItem(
+                const _MenuItem(
                   icon: Icons.people_outline,
                   title: 'Usuários',
                   route: '/usuarios',
                   helpText: 'Veja a lista de usuários e gerencie permissões.',
                   showHelp: _showHelp,
                 ),
-                _MenuItem(
+                const _MenuItem(
                   icon: Icons.person_add_outlined,
                   title: 'Cadastrar Usuário',
                   route: '/cadastrar/usuario',
@@ -159,8 +160,8 @@ class _MenuItemState extends State<_MenuItem> {
     });
 
     try {
-      final overlay = Overlay.of(context, rootOverlay: true) ?? Overlay.of(context);
-      overlay?.insert(_overlayEntry!);
+      final overlay = Overlay.of(context, rootOverlay: true);
+      overlay.insert(_overlayEntry!);
     } catch (_) {
       _overlayEntry = null;
     }
@@ -187,7 +188,9 @@ class _MenuItemState extends State<_MenuItem> {
       key: _itemKey,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.primaryColor.withAlpha((0.1 * 255).round()) : null,
+        color: isActive
+            ? AppTheme.primaryColor.withAlpha((0.1 * 255).round())
+            : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -196,15 +199,19 @@ class _MenuItemState extends State<_MenuItem> {
           ListTile(
             leading: Icon(
               widget.icon,
-              color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
+              color:
+                  isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
             ),
             title: isMobile && widget.showHelp && widget.helpText != null
                 ? _HelpTooltipMobile(text: widget.helpText!)
                 : Text(
                     widget.title,
                     style: TextStyle(
-                      color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                      color: isActive
+                          ? AppTheme.primaryColor
+                          : AppTheme.textPrimaryColor,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
             onTap: () {
@@ -222,7 +229,7 @@ class _MenuItemState extends State<_MenuItem> {
 class _HelpTooltipMobile extends StatelessWidget {
   final String text;
 
-  const _HelpTooltipMobile({super.key, required this.text});
+  const _HelpTooltipMobile({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +250,7 @@ class _HelpTooltipMobile extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -263,7 +270,7 @@ class _HelpTooltipMobile extends StatelessWidget {
 class _HelpTooltip extends StatelessWidget {
   final String text;
 
-  const _HelpTooltip({super.key, required this.text});
+  const _HelpTooltip({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +289,7 @@ class _HelpTooltip extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -312,7 +319,7 @@ class _TrianglePainter extends CustomPainter {
     path.lineTo(0, size.height / 2);
     path.lineTo(size.width, size.height / 2 + 6);
     path.close();
-    canvas.drawShadow(path, Colors.black.withOpacity(0.15), 4, false);
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.15), 4, false);
     canvas.drawPath(path, paint);
   }
 
