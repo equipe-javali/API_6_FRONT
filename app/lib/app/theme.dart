@@ -10,6 +10,9 @@ class AppTheme {
   static const Color textPrimaryColor = Color(0xFF7968D8);   // Texto principal branco
   static const Color textSecondaryColor = Color(0xFFB0B0B0); // Texto secundário cinza
   static const Color borderColor = Color(0xFF404040);        // Bordas dos inputs
+  static const Color successColor = Color(0xFF4CAF50);       // Verde (sucesso)
+  static const Color errorColor = Color(0xFFF44336);         // Vermelho (erro)
+  static const Color neutralWhite = Colors.white; // Branco (alertas)
 
   // Tema escuro (principal baseado no wireframe)
   static ThemeData darkTheme = ThemeData(

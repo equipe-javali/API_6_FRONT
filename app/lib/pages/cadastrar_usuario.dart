@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app/app/theme.dart';
 import 'package:app/widgets/app_scaffold.dart';
 import 'package:app/services/auth_service.dart';
 import 'dart:convert';
@@ -108,9 +109,13 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
         if (response.statusCode == 200 && data['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text(data['message'] ?? 'Usuário cadastrado com sucesso!'),
-              backgroundColor: Colors.green,
+              content: Text(
+                data['message'] ?? 'Usuário cadastrado com sucesso!',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.neutralWhite,
+                    ),
+              ),
+              backgroundColor: AppTheme.successColor,
             ),
           );
 
@@ -126,18 +131,28 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(data['message'] ??
-                  data['detail'] ??
-                  'Erro ao cadastrar usuário'),
-              backgroundColor: Colors.red,
+              content: Text(
+                data['message'] ??
+                    data['detail'] ??
+                    'Erro ao cadastrar usuário',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.neutralWhite,
+                    ),
+              ),
+              backgroundColor: AppTheme.errorColor,
             ),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro de conexão: $e'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'Erro de conexão!',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.neutralWhite,
+                  ),
+            ),
+            backgroundColor: AppTheme.errorColor,
           ),
         );
       } finally {
@@ -158,10 +173,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
     if (value.length < 6) return 'A senha deve ter pelo menos 6 caracteres';
     return null;
   }
-
-  static const branco = Color(0xFFFFFFFF);
-  static const roxo = Color(0xFF9B8DF7);
-  static const roxo2 = Color(0xFF7968D8);
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -259,10 +270,15 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Receber relatório', style: TextStyle(color: roxo)),
+              Text(
+                'Receber relatório',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
               Switch(
                 value: _receberRelatorio,
-                activeColor: roxo,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: _isLoading
                     ? null
                     : (value) => setState(() => _receberRelatorio = value),
@@ -297,11 +313,15 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Receber relatório',
-                      style: TextStyle(color: roxo)),
+                  Text(
+                    'Receber relatório',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
                   Switch(
                     value: _receberRelatorio,
-                    activeColor: roxo,
+                    activeColor: Theme.of(context).colorScheme.primary,
                     onChanged: _isLoading
                         ? null
                         : (value) => setState(() => _receberRelatorio = value),
@@ -316,21 +336,23 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
   }
 
   Widget _buildSubmitButton(bool isMobile) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       width: isMobile ? double.infinity : 220,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _adicionarUsuario,
         style: ElevatedButton.styleFrom(
-          backgroundColor: roxo2,
-          foregroundColor: branco,
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(vertical: 14),
-          textStyle: const TextStyle(
+          textStyle: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
         ),
         child: _isLoading
-            ? const Row(
+            ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
@@ -338,14 +360,24 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                     width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: branco,
+                      color: theme.colorScheme.onPrimary,
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Text('Processando...'),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Processando...',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
                 ],
               )
-            : const Text('Adicionar'),
+            : Text(
+                'Adicionar',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
       ),
     );
   }
