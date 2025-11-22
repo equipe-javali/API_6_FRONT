@@ -38,12 +38,6 @@ class _ChatPageState extends State<ChatPage> {
         .toList();
   }
 
-  final sortedKeys = groups.keys.toList()..sort();
-  return sortedKeys
-      .map((key) => {'date': key, 'messages': groups[key]!})
-      .toList();
-}
-
   // 🎨 Paleta e estilo base
   final color1 = const Color(0xFF23232C);
   final color2 = const Color(0xFF7968D8);
