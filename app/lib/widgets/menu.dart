@@ -43,6 +43,11 @@ class _AppMenuState extends State<AppMenu> {
                   // helpText: 'Crie um novo usuário preenchendo os campos necessários.',
                   // showHelp: _showHelp,
                 ),
+                  _MenuItem(
+                    icon: Icons.person_outline,
+                    title: 'Perfil',
+                    route: '/profile',
+                  ),
                 const Divider(color: AppTheme.borderColor),
                 _MenuItem(
                   icon: Icons.logout,
