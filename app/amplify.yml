@@ -3,19 +3,27 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Limpar cache anterior (evita erro de pasta já existente)
         - rm -rf flutter
         - rm -rf .pub-cache
+        # Instalar dependências do sistema
+        - apt-get update || true
+        - apt-get install -y curl git unzip xz-utils zip libglu1-mesa || true
+        # Clonar Flutter
         - git clone https://github.com/flutter/flutter.git -b stable --depth 1
         - export PATH="$PATH:`pwd`/flutter/bin"
         - flutter --version
+        - flutter doctor -v
         - flutter config --enable-web
-        - cd app  
+        # Entrar na pasta do projeto
+        - cd app
         - flutter pub get
     build:
       commands:
-        - flutter build web --release --verbose
+        - cd app
+        - flutter build web --release
   artifacts:
-    baseDirectory: app/build/web  
+    baseDirectory: app/build/web
     files:
       - '**/*'
   cache:
