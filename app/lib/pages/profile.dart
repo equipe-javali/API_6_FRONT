@@ -154,73 +154,122 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _nomeController,
-                readOnly: true,
-                decoration: const InputDecoration(labelText: "Nome"),
+              LayoutBuilder(builder: (context, constraints) {
+  const gap = 12.0;
+  final half = (constraints.maxWidth - gap) / 2;
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+
+      // --- Linha Nome + Email ---
+      Row(
+        children: [
+          SizedBox(
+            width: half,
+            child: TextFormField(
+              controller: _nomeController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: "Nome",
+                prefixIcon: const Icon(Icons.person),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-                validator: _validateEmail,
+            ),
+          ),
+          const SizedBox(width: gap),
+          SizedBox(
+            width: half,
+            child: TextFormField(
+              controller: _emailController,
+              validator: _validateEmail,
+              decoration: InputDecoration(
+                labelText: "Email",
+                prefixIcon: const Icon(Icons.email),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
+            ),
+          ),
+        ],
+      ),
 
-              const SizedBox(height: 16),
+      const SizedBox(height: 16),
 
-              TextFormField(
-                controller: _senhaController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Nova senha (opcional)",
+      // --- Linha Senha + Switch ---
+      Row(
+        children: [
+          SizedBox(
+            width: half,
+            child: TextFormField(
+              controller: _senhaController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: "Senha",
+                prefixIcon: const Icon(Icons.key),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ),
+          const SizedBox(width: gap),
+
+          // Mantém exatamente alinhado ao lado
+          SizedBox(
+            width: half,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Text("Receber relatório", style: TextStyle(color: Color(0xFF9B8DF7))),
+                const SizedBox(width: 8),
+                Switch(
+                  value: _receberRelatorio,
+                  activeColor: Color(0xFF9B8DF7),
+                  onChanged: (v) => setState(() => _receberRelatorio = v),
                 ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Receber boletim",
-                      style: TextStyle(color: roxo)),
-                  const SizedBox(width: 12),
-                  Switch(
-                    value: _receberRelatorio,
-                    activeColor: roxo,
-                    onChanged: (v) {
-                      setState(() => _receberRelatorio = v);
-                    },
-                  )
-                ],
-              ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}),
 
               const SizedBox(height: 28),
 
-              SizedBox(
-                width: 220,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _editarUsuario,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7968D8),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: 220,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _editarUsuario,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7968D8),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text("Salvar alterações"),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text("Salvar alterações"),
                 ),
               ),
             ],

@@ -32,14 +32,14 @@ class _AppMenuState extends State<AppMenu> {
                   helpText: 'Acesse o chat para fazer perguntas.',
                   showHelp: _showHelp,
                 ),
-                const _MenuItem(
+                _MenuItem(
                   icon: Icons.people_outline,
                   title: 'Usuários',
                   route: '/usuarios',
                   helpText: 'Veja a lista de usuários e gerencie permissões.',
                   showHelp: _showHelp,
                 ),
-                const _MenuItem(
+                _MenuItem(
                   icon: Icons.person_add_outlined,
                   title: 'Cadastrar Usuário',
                   route: '/cadastrar/usuario',
