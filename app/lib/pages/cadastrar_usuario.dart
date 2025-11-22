@@ -96,7 +96,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://127.0.0.1:8000/users/usuario'),
+          Uri.parse('https://44-208-237-146.nip.io/users/usuario'),
           headers: {
             'Content-Type': 'application/json',
           },

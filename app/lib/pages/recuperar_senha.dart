@@ -24,7 +24,7 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/password/recover'),
+        Uri.parse('https://44-208-237-146.nip.io/password/recover'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': emailController.text.trim()}),
       );
