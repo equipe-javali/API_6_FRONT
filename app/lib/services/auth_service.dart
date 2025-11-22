@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = "https://task-41.d2djntt2xh1nls.amplifyapp.com/";
 
   Future<String?> login(String username, String password) async {
     try {
