@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/services/auth_service.dart';  
 
 
-
 class Usuario {
   final int id;
   final String email;
@@ -25,8 +24,7 @@ class Usuario {
 }
 
 class ListarUsuariosPage extends StatefulWidget {
-  final AuthService _authService = AuthService();
-  ListarUsuariosPage({super.key});
+  const ListarUsuariosPage({super.key});
 
   @override
   State<ListarUsuariosPage> createState() => _ListarUsuariosPageState();
@@ -35,6 +33,7 @@ class ListarUsuariosPage extends StatefulWidget {
 class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   late Future<List<Usuario>> _usuariosFuture;
   List<Usuario> _usuarios = [];
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -48,7 +47,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   }
 
   Future<List<Usuario>> listarUsuarios() async {
-    final url = Uri.parse(widget._authService.baseUrl).replace(path: '/users');
+    final url = Uri.parse('${_authService.baseUrl}/users');
     final token = await _getToken();
     final response = await http.get(
       url,
