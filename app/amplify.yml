@@ -2,11 +2,12 @@ version: 1
 frontend:
   phases:
     preBuild:
-      commands:     
-        - rm -rf flutter
-        - rm -rf .pub-cache
+      commands:
+        - echo "Limpando cache do Flutter..."
+        - rm -rf flutter || true
+        - rm -rf .pub-cache || true        
         - apt-get update || true
-        - apt-get install -y curl git unzip xz-utils zip libglu1-mesa || true        
+        - apt-get install -y curl git unzip xz-utils zip libglu1-mesa || true
         - git clone https://github.com/flutter/flutter.git -b stable --depth 1
         - export PATH="$PATH:`pwd`/flutter/bin"
         - flutter --version
@@ -16,12 +17,11 @@ frontend:
         - flutter pub get
     build:
       commands:
+        - cd app
         - flutter build web --release
   artifacts:
     baseDirectory: app/build/web
     files:
       - '**/*'
   cache:
-    paths:
-      - flutter/**/*
-      - .pub-cache/**/*
+    paths: []  
