@@ -25,7 +25,7 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
     });
 
     try {
-      final url = Uri.parse(_authService.baseUrl).replace(path: '/password/recover');  // mude de '/users' para '/password/recover'
+      final url = Uri.parse('${_authService.baseUrl}/password/recover');
     final response = await http.post(url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': emailController.text.trim()}),
