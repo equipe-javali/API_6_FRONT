@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:app/widgets/app_scaffold.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:app/services/auth_service.dart';  
-
+import 'package:app/services/auth_service.dart'; 
 
 class Usuario {
   final int id;
@@ -22,7 +21,7 @@ class Usuario {
     );
   }
 }
-
+final AuthService _authService = AuthService(); 
 class ListarUsuariosPage extends StatefulWidget {
   const ListarUsuariosPage({super.key});
 
@@ -33,7 +32,6 @@ class ListarUsuariosPage extends StatefulWidget {
 class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   late Future<List<Usuario>> _usuariosFuture;
   List<Usuario> _usuarios = [];
-  final AuthService _authService = AuthService();
 
   @override
   void initState() {

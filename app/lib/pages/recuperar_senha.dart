@@ -3,8 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:app/services/auth_service.dart';  // adicione import
-
+import 'package:app/services/auth_service.dart'; 
 
 class RecuperarSenhaPage extends StatefulWidget {
   const RecuperarSenhaPage({super.key});
@@ -26,11 +25,11 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
     });
 
     try {
-      final url = Uri.parse(_authService.baseUrl).replace(path: '/users');
-      final response = await http.post(url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': emailController.text.trim()}),
-      );
+      final url = Uri.parse(_authService.baseUrl).replace(path: '/password/recover');  // mude de '/users' para '/password/recover'
+    final response = await http.post(url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': emailController.text.trim()}),
+    );
 
       setState(() => isLoading = false);
 
