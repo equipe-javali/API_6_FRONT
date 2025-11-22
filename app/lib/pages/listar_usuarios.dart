@@ -47,7 +47,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   }
 
   Future<List<Usuario>> listarUsuarios() async {
-    final url = Uri.parse('${_authService.baseUrl}/users');
+    final url = Uri.parse(_authService.baseUrl).replace(path: '/users');
     final token = await _getToken();
     final response = await http.get(
       url,
@@ -76,7 +76,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       return;
     }
 
-    final url = Uri.parse('https://44-208-237-146.nip.io/users/$userId');
+    final url = Uri.parse(_authService.baseUrl).replace(path: '/users/$userId');
     final response = await http.delete(
       url,
       headers: {
@@ -118,7 +118,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
         return;
       }
 
-      final url = Uri.parse('https://44-208-237-146.nip.io/enviar-relatorio');
+      final url = Uri.parse(_authService.baseUrl).replace(path: '/enviar-relatorio');
       final response = await http.post(
         url,
         headers: {'Authorization': 'Bearer $token'},
@@ -187,7 +187,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       return;
     }
 
-    final url = Uri.parse('https://44-208-237-146.nip.io/users/$userId/status');
+    final url = Uri.parse(_authService.baseUrl).replace(path: '/users/$userId/status');
     final response = await http.put(
       url,
       headers: {
