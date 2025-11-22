@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:app/widgets/app_scaffold.dart';
 import 'package:app/services/auth_service.dart';
@@ -95,11 +96,10 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
       });
 
       try {
+        final url = Uri.parse(_authService.baseUrl).replace(path: '/users');
         final response = await http.post(
-          Uri.parse('https://44-208-237-146.nip.io/users/usuario'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          url,
+          headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'nome': _nomeController.text.trim(),
             'email': _emailController.text.trim(),

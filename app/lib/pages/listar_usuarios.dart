@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:app/widgets/app_scaffold.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:app/services/auth_service.dart';  
+
+
 
 class Usuario {
   final int id;
@@ -22,7 +25,8 @@ class Usuario {
 }
 
 class ListarUsuariosPage extends StatefulWidget {
-  const ListarUsuariosPage({super.key});
+  final AuthService _authService = AuthService();
+  ListarUsuariosPage({super.key});
 
   @override
   State<ListarUsuariosPage> createState() => _ListarUsuariosPageState();
@@ -44,7 +48,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   }
 
   Future<List<Usuario>> listarUsuarios() async {
-    final url = Uri.parse('https://44-208-237-146.nip.io/users');
+    final url = Uri.parse(widget._authService.baseUrl).replace(path: '/users');
     final token = await _getToken();
     final response = await http.get(
       url,
