@@ -38,6 +38,12 @@ class _ChatPageState extends State<ChatPage> {
         .toList();
   }
 
+  final sortedKeys = groups.keys.toList()..sort();
+  return sortedKeys
+      .map((key) => {'date': key, 'messages': groups[key]!})
+      .toList();
+}
+
   // 🎨 Paleta e estilo base
   final color1 = const Color(0xFF23232C);
   final color2 = const Color(0xFF7968D8);
@@ -256,20 +262,12 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  DateTime _dateOnlyLocal(DateTime dt) {
-    final l = dt.toLocal();
-    return DateTime(l.year, l.month, l.day);
-  }
-
   bool _isSameDay(DateTime a, DateTime b) {
-    final da = _dateOnlyLocal(a);
-    final db = _dateOnlyLocal(b);
-    return da.year == db.year && da.month == db.month && da.day == db.day;
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   bool _isYesterday(DateTime date) {
-    final today = _dateOnlyLocal(DateTime.now());
-    final yesterday = today.subtract(const Duration(days: 1));
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
     return _isSameDay(date, yesterday);
   }
 
@@ -279,9 +277,9 @@ class _ChatPageState extends State<ChatPage> {
     if (_isYesterday(date)) return 'Ontem';
     
     try {
-      return DateFormat("d 'de' MMMM 'de' y", 'pt_BR').format(date.toLocal());
+      return DateFormat("d 'de' MMMM 'de' y", 'pt_BR').format(date);
     } catch (_) {
-      return DateFormat('yyyy-MM-dd').format(date.toLocal());
+      return DateFormat('yyyy-MM-dd').format(date);
     }
   }
 
@@ -358,7 +356,7 @@ class _ChatPageState extends State<ChatPage> {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Text(
-                    DateFormat('HH:mm').format(time.toLocal()),
+                    DateFormat('HH:mm').format(time),
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.5),
                       fontSize: 11,

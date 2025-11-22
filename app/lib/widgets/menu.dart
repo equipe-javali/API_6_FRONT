@@ -32,14 +32,14 @@ class _AppMenuState extends State<AppMenu> {
                   helpText: 'Acesse o chat para fazer perguntas.',
                   showHelp: _showHelp,
                 ),
-                _MenuItem(
+                const _MenuItem(
                   icon: Icons.people_outline,
                   title: 'Usuários',
                   route: '/usuarios',
                   helpText: 'Veja a lista de usuários e gerencie permissões.',
                   showHelp: _showHelp,
                 ),
-                _MenuItem(
+                const _MenuItem(
                   icon: Icons.person_add_outlined,
                   title: 'Cadastrar Usuário',
                   route: '/cadastrar/usuario',
@@ -196,7 +196,9 @@ class _MenuItemState extends State<_MenuItem> {
       key: _itemKey,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.primaryColor.withAlpha((0.1 * 255).round()) : null,
+        color: isActive
+            ? AppTheme.primaryColor.withAlpha((0.1 * 255).round())
+            : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
