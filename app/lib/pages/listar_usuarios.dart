@@ -45,7 +45,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   }
 
   Future<List<Usuario>> listarUsuarios() async {
-    final url = Uri.parse('${_authService.baseUrl}/users');
+    final url = Uri.parse('${_authService.baseUrl}/users/');
     final token = await _getToken();
     final response = await http.get(
       url,
@@ -119,7 +119,10 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       final url = Uri.parse('${_authService.baseUrl}/enviar-relatorio');
       final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (!mounted) return;

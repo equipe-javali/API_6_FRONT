@@ -44,8 +44,8 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
       final token = await _authService.getToken();
       if (token == null) return;
 
-      final urlUser = Uri.parse('${_authService.baseUrl}/users/me/');
-      final respUser = await http.get(urlUser, headers: {
+      final url = Uri.parse('${_authService.baseUrl}/users/usuario');
+      final respUser = await http.get(url, headers: {
         'Authorization': 'Bearer $token',
       });
 
@@ -54,7 +54,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
         _userId = dataUser['id'];
 
         final urlTipo =
-            Uri.parse('${_authService.baseUrl}/users/tipo/$_userId');
+            Uri.parse('${_authService.baseUrl}/users/tipo/$_userId/');
         final respTipo = await http.get(urlTipo, headers: {
           'Authorization': 'Bearer $token',
         });
@@ -96,7 +96,7 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
       });
 
       try {
-        final url = Uri.parse(_authService.baseUrl).replace(path: '/users');
+        final url = Uri.parse('${_authService.baseUrl}/users/usuario');
         final response = await http.post(
           url,
           headers: {'Content-Type': 'application/json'},
