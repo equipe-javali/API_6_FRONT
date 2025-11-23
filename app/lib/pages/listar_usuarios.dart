@@ -50,9 +50,11 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     return prefs.getString('access_token');
   }
 
-  Future<List<Usuario>> listarUsuarios() async {
-    final url = Uri.parse('http://127.0.0.1:8000/users');
+  Future<List<Usuario>> listarUsuarios({int skip = 0, int limit = 20}) async {
+    final url =
+        Uri.parse('http://127.0.0.1:8000/users?skip=$skip&limit=$limit');
     final token = await _getToken();
+
     final response = await http.get(
       url,
       headers: {
@@ -605,13 +607,31 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
 
   Widget _buildUsuarioList(BuildContext context) {
     return Expanded(
-      child: ListView.separated(
-        itemBuilder: (context, index) =>
-            _buildUsuarioItem(context, _usuarios[index]),
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemCount: _usuarios.length,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (scrollInfo) {
+          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+            _carregarMaisUsuarios();
+          }
+          return false;
+        },
+        child: ListView.separated(
+          itemBuilder: (context, index) =>
+              _buildUsuarioItem(context, _usuarios[index]),
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemCount: _usuarios.length,
+        ),
       ),
     );
+  }
+
+  Future<void> _carregarMaisUsuarios() async {
+    final novosUsuarios = await listarUsuarios(
+      skip: _usuarios.length,
+      limit: 20,
+    );
+    setState(() {
+      _usuarios.addAll(novosUsuarios);
+    });
   }
 
   @override
