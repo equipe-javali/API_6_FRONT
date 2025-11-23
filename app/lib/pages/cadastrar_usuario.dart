@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app/app/theme.dart';
 import 'package:app/widgets/app_scaffold.dart';
-import 'package:app/services/auth_service.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -14,76 +13,22 @@ class CadastrarUsuarioPage extends StatefulWidget {
 
 class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
+  bool _usuarioAdministrador = false;
   bool _receberRelatorio = false;
   bool _isLoading = false;
-
-  final AuthService _authService = AuthService();
-  int? _userId;
-  List<String> _tipos = ["Administrador", "Padrão"];
-  String? _tipoUsuario = "Padrão";
 
   @override
   void initState() {
     super.initState();
-    _carregarTiposUsuario();
   }
 
   @override
   void dispose() {
-    _nomeController.dispose();
     _emailController.dispose();
     _senhaController.dispose();
     super.dispose();
-  }
-
-  Future<void> _carregarTiposUsuario() async {
-    try {
-      final token = await _authService.getToken();
-      if (token == null) return;
-
-      final urlUser = Uri.parse('${_authService.baseUrl}/users/me/');
-      final respUser = await http.get(urlUser, headers: {
-        'Authorization': 'Bearer $token',
-      });
-
-      if (respUser.statusCode == 200) {
-        final dataUser = jsonDecode(respUser.body);
-        _userId = dataUser['id'];
-
-        final urlTipo =
-            Uri.parse('${_authService.baseUrl}/users/tipo/$_userId');
-        final respTipo = await http.get(urlTipo, headers: {
-          'Authorization': 'Bearer $token',
-        });
-
-        if (respTipo.statusCode == 200) {
-          final body = jsonDecode(respTipo.body);
-          final tipos = (body is List)
-              ? List<String>.from(body)
-              : (body is String && body.isNotEmpty)
-                  ? [body]
-                  : <String>[];
-
-          setState(() {
-            _tipos = tipos.isNotEmpty ? tipos : ['Não encontrado'];
-            _tipoUsuario = _tipos.first;
-          });
-        } else {
-          setState(() {
-            _tipos = ['Não encontrado'];
-            _tipoUsuario = _tipos.first;
-          });
-        }
-      }
-    } catch (e) {
-      setState(() {
-        _tipos = ['Não encontrado'];
-        _tipoUsuario = _tipos.first;
-      });
-    }
   }
 
   Future<void> _adicionarUsuario() async {
@@ -95,11 +40,10 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           Uri.parse('http://127.0.0.1:8000/users/usuario'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            'nome': _nomeController.text.trim(),
             'email': _emailController.text.trim(),
             'senha': _senhaController.text,
             'recebe_boletim': _receberRelatorio,
-            'tipo': _tipoUsuario,
+            'admin': _usuarioAdministrador,
           }),
         );
 
@@ -119,14 +63,11 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
             ),
           );
 
-          _nomeController.clear();
           _emailController.clear();
           _senhaController.clear();
           setState(() {
             _receberRelatorio = false;
-            _tipoUsuario = _tipos.isNotEmpty
-                ? _tipos.first
-                : 'Nenhum tipo de usuário encontrado';
+            _usuarioAdministrador = false;
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -188,23 +129,47 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
     );
   }
 
+  Widget _buildSwitch({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        Switch(
+          value: value,
+          activeColor: theme.colorScheme.primary,
+          onChanged: _isLoading ? null : onChanged,
+        ),
+      ],
+    );
+  }
+
   bool _isMobile(BoxConstraints constraints) => constraints.maxWidth < 600;
 
-  Widget _buildNomeEmailFields(bool isMobile) {
+  Widget _buildEmailSenhaFields(bool isMobile) {
     if (isMobile) {
       return Column(
         children: [
           _buildTextField(
-            controller: _nomeController,
-            label: 'Nome',
-            validator: (value) =>
-                value == null || value.isEmpty ? 'Informe o nome' : null,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
             controller: _emailController,
             label: 'Email',
             validator: _validateEmail,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _senhaController,
+            label: 'Senha',
+            obscureText: true,
+            validator: _validatePassword,
           ),
         ],
       );
@@ -216,15 +181,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
           runSpacing: 16,
           alignment: WrapAlignment.spaceAround,
           children: [
-            SizedBox(
-              width: 300,
-              child: _buildTextField(
-                controller: _nomeController,
-                label: 'Nome',
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Informe o nome' : null,
-              ),
-            ),
             SizedBox(
               width: 300,
               child: _buildTextField(
@@ -233,68 +189,6 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                 validator: _validateEmail,
               ),
             ),
-          ],
-        ),
-      );
-    }
-  }
-
-  Widget _buildTipoDropdown() {
-    return DropdownButtonFormField<String>(
-      value: _tipoUsuario,
-      decoration: const InputDecoration(labelText: 'Tipo de Usuário'),
-      items: _tipos
-          .map((tipo) => DropdownMenuItem(value: tipo, child: Text(tipo)))
-          .toList(),
-      onChanged: (value) {
-        setState(() {
-          _tipoUsuario = value;
-        });
-      },
-    );
-  }
-
-  Widget _buildSenhaTipoRelatorioFields(bool isMobile) {
-    if (isMobile) {
-      return Column(
-        children: [
-          _buildTextField(
-            controller: _senhaController,
-            label: 'Senha',
-            obscureText: true,
-            validator: _validatePassword,
-          ),
-          const SizedBox(height: 16),
-          _buildTipoDropdown(),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Receber relatório',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-              Switch(
-                value: _receberRelatorio,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: _isLoading
-                    ? null
-                    : (value) => setState(() => _receberRelatorio = value),
-              ),
-            ],
-          ),
-        ],
-      );
-    } else {
-      return SizedBox(
-        width: double.infinity,
-        child: Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          alignment: WrapAlignment.spaceAround,
-          children: [
             SizedBox(
               width: 300,
               child: _buildTextField(
@@ -304,31 +198,50 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                 validator: _validatePassword,
               ),
             ),
-            SizedBox(
-              width: 300,
-              child: _buildTipoDropdown(),
-            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _buildTipoUsuarioRelatorioFields(bool isMobile) {
+    if (isMobile) {
+      return Column(children: [
+        _buildSwitch(
+          label: 'Usuário Administrador',
+          value: _usuarioAdministrador,
+          onChanged: (v) => setState(() => _usuarioAdministrador = v),
+        ),
+        const SizedBox(height: 16),
+        _buildSwitch(
+          label: 'Receber relatório',
+          value: _receberRelatorio,
+          onChanged: (v) => setState(() => _receberRelatorio = v),
+        ),
+      ]);
+    } else {
+      return SizedBox(
+        width: double.infinity,
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.spaceAround,
+          children: [
             SizedBox(
               width: 260,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Receber relatório',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  Switch(
-                    value: _receberRelatorio,
-                    activeColor: Theme.of(context).colorScheme.primary,
-                    onChanged: _isLoading
-                        ? null
-                        : (value) => setState(() => _receberRelatorio = value),
-                  ),
-                ],
+              child: _buildSwitch(
+                label: 'Usuário Administrador',
+                value: _usuarioAdministrador,
+                onChanged: (v) => setState(() => _usuarioAdministrador = v),
               ),
             ),
+            SizedBox(
+                width: 260,
+                child: _buildSwitch(
+                  label: 'Receber relatório',
+                  value: _receberRelatorio,
+                  onChanged: (v) => setState(() => _receberRelatorio = v),
+                )),
           ],
         ),
       );
@@ -400,9 +313,9 @@ class _CadastrarUsuarioPageState extends State<CadastrarUsuarioPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    _buildNomeEmailFields(isMobile),
+                    _buildEmailSenhaFields(isMobile),
                     const SizedBox(height: 16),
-                    _buildSenhaTipoRelatorioFields(isMobile),
+                    _buildTipoUsuarioRelatorioFields(isMobile),
                     const SizedBox(height: 28),
                     _buildSubmitButton(isMobile),
                   ],

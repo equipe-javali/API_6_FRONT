@@ -52,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
         final data = jsonDecode(resp.body);
 
         setState(() {
-          _userId = data["id"];  // ✔ sempre o usuário autenticado
+          _userId = data["id"]; // ✔ sempre o usuário autenticado
           _nomeController.text = data["nome"] ?? "";
           _emailController.text = data["email"] ?? "";
           _receberRelatorio = data["recebe_boletim"] ?? false;
@@ -76,8 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
       final token = await _authService.getToken();
       if (token == null) return;
 
-      final url =
-          Uri.parse("${_authService.baseUrl}/users/$_userId/profile");
+      final url = Uri.parse("${_authService.baseUrl}/users/$_userId/profile");
 
       final Map<String, dynamic> body = {
         "email": _emailController.text.trim(),
@@ -138,8 +137,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    const roxo = Color(0xFF9B8DF7);
-
     if (_isLoadingUser) {
       return const AppScaffold(
         title: "Perfil",
@@ -157,93 +154,98 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LayoutBuilder(builder: (context, constraints) {
-  const gap = 12.0;
-  final half = (constraints.maxWidth - gap) / 2;
+                const gap = 12.0;
+                final half = (constraints.maxWidth - gap) / 2;
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- Linha Nome + Email ---
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: half,
+                          child: TextFormField(
+                            controller: _nomeController,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              labelText: "Nome",
+                              prefixIcon: const Icon(Icons.person),
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 12),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: gap),
+                        SizedBox(
+                          width: half,
+                          child: TextFormField(
+                            controller: _emailController,
+                            validator: _validateEmail,
+                            decoration: InputDecoration(
+                              labelText: "Email",
+                              prefixIcon: const Icon(Icons.email),
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 12),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
-      // --- Linha Nome + Email ---
-      Row(
-        children: [
-          SizedBox(
-            width: half,
-            child: TextFormField(
-              controller: _nomeController,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: "Nome",
-                prefixIcon: const Icon(Icons.person),
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-          ),
-          const SizedBox(width: gap),
-          SizedBox(
-            width: half,
-            child: TextFormField(
-              controller: _emailController,
-              validator: _validateEmail,
-              decoration: InputDecoration(
-                labelText: "Email",
-                prefixIcon: const Icon(Icons.email),
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-          ),
-        ],
-      ),
+                    const SizedBox(height: 16),
 
-      const SizedBox(height: 16),
+                    // --- Linha Senha + Switch ---
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: half,
+                          child: TextFormField(
+                            controller: _senhaController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: "Senha",
+                              prefixIcon: const Icon(Icons.key),
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 12),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: gap),
 
-      // --- Linha Senha + Switch ---
-      Row(
-        children: [
-          SizedBox(
-            width: half,
-            child: TextFormField(
-              controller: _senhaController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Senha",
-                prefixIcon: const Icon(Icons.key),
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-          ),
-          const SizedBox(width: gap),
-
-          // Mantém exatamente alinhado ao lado
-          SizedBox(
-            width: half,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Text("Receber relatório", style: TextStyle(color: Color(0xFF9B8DF7))),
-                const SizedBox(width: 8),
-                Switch(
-                  value: _receberRelatorio,
-                  activeColor: Color(0xFF9B8DF7),
-                  onChanged: (v) => setState(() => _receberRelatorio = v),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ],
-  );
-}),
-
+                        // Mantém exatamente alinhado ao lado
+                        SizedBox(
+                          width: half,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const Text("Receber relatório",
+                                  style: TextStyle(color: Color(0xFF9B8DF7))),
+                              const SizedBox(width: 8),
+                              Switch(
+                                value: _receberRelatorio,
+                                activeColor: const Color(0xFF9B8DF7),
+                                onChanged: (v) =>
+                                    setState(() => _receberRelatorio = v),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }),
               const SizedBox(height: 28),
-
               Align(
                 alignment: Alignment.centerLeft,
                 child: SizedBox(

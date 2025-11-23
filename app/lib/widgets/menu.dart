@@ -43,7 +43,8 @@ class _AppMenuState extends State<AppMenu> {
                   icon: Icons.person_add_outlined,
                   title: 'Cadastrar Usuário',
                   route: '/cadastrar/usuario',
-                  helpText: 'Crie um novo usuário preenchendo os campos necessários.',
+                  helpText:
+                      'Crie um novo usuário preenchendo os campos necessários.',
                   showHelp: _showHelp,
                 ),
                 const Divider(color: AppTheme.borderColor),
@@ -58,7 +59,6 @@ class _AppMenuState extends State<AppMenu> {
               ],
             ),
           ),
-
           SafeArea(
             minimum: const EdgeInsets.all(12),
             child: Align(
@@ -118,7 +118,8 @@ class _MenuItemState extends State<_MenuItem> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         try {
-          final isDesktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+          final isDesktop =
+              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
           if (isDesktop) {
             _insertOverlay();
           } else {
@@ -139,9 +140,13 @@ class _MenuItemState extends State<_MenuItem> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _removeOverlay();
-        final isDesktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
-        if (isDesktop) _insertOverlay();
-        else setState(() {});
+        final isDesktop =
+            MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+        if (isDesktop) {
+          _insertOverlay();
+        } else {
+          setState(() {});
+        }
       });
     }
   }
@@ -168,8 +173,8 @@ class _MenuItemState extends State<_MenuItem> {
     });
 
     try {
-      final overlay = Overlay.of(context, rootOverlay: true) ?? Overlay.of(context);
-      overlay?.insert(_overlayEntry!);
+      final overlay = Overlay.of(context, rootOverlay: true);
+      overlay.insert(_overlayEntry!);
     } catch (_) {
       _overlayEntry = null;
     }
@@ -207,15 +212,19 @@ class _MenuItemState extends State<_MenuItem> {
           ListTile(
             leading: Icon(
               widget.icon,
-              color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
+              color:
+                  isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
             ),
             title: isMobile && widget.showHelp && widget.helpText != null
                 ? _HelpTooltipMobile(text: widget.helpText!)
                 : Text(
                     widget.title,
                     style: TextStyle(
-                      color: isActive ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                      color: isActive
+                          ? AppTheme.primaryColor
+                          : AppTheme.textPrimaryColor,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
             onTap: () {
@@ -233,7 +242,7 @@ class _MenuItemState extends State<_MenuItem> {
 class _HelpTooltipMobile extends StatelessWidget {
   final String text;
 
-  const _HelpTooltipMobile({super.key, required this.text});
+  const _HelpTooltipMobile({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +262,7 @@ class _HelpTooltipMobile extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -273,7 +282,7 @@ class _HelpTooltipMobile extends StatelessWidget {
 class _HelpTooltip extends StatelessWidget {
   final String text;
 
-  const _HelpTooltip({super.key, required this.text});
+  const _HelpTooltip({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +301,7 @@ class _HelpTooltip extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -322,7 +331,7 @@ class _TrianglePainter extends CustomPainter {
     path.lineTo(0, size.height / 2);
     path.lineTo(size.width, size.height / 2 + 6);
     path.close();
-    canvas.drawShadow(path, Colors.black.withOpacity(0.15), 4, false);
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.15), 4, false);
     canvas.drawPath(path, paint);
   }
 
