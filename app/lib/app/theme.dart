@@ -3,13 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Cores baseadas no wireframe
-  static const Color backgroundColor = Color(0xFF1A1A1A);     // Fundo escuro principal
-  static const Color surfaceColor = Color(0xFF2D2D2D);       // Cards e superfícies
-  static const Color primaryColor = Color(0xFF7968D8);       // Roxo dos botões
-  static const Color accentColor = Color(0xFF7968D8);        // Azul cyan dos ícones
-  static const Color textPrimaryColor = Color(0xFF7968D8);   // Texto principal branco
-  static const Color textSecondaryColor = Color(0xFFB0B0B0); // Texto secundário cinza
-  static const Color borderColor = Color(0xFF404040);        // Bordas dos inputs
+  static const Color backgroundColor =
+      Color(0xFF1A1A1A); // Fundo escuro principal
+  static const Color surfaceColor = Color(0xFF2D2D2D); // Cards e superfícies
+  static const Color primaryColor = Color(0xFF7968D8); // Roxo dos botões
+  static const Color accentColor = Color(0xFF7968D8); // Azul cyan dos ícones
+  static const Color textPrimaryColor =
+      Color(0xFF7968D8); // Texto principal branco
+  static const Color textSecondaryColor =
+      Color(0xFFB0B0B0); // Texto secundário cinza
+  static const Color borderColor = Color(0xFF404040); // Bordas dos inputs
+  static const Color successColor = Color(0xFF4CAF50); // Verde (sucesso)
+  static const Color errorColor = Color(0xFFF44336); // Vermelho (erro)
+  static const Color neutralWhite = Colors.white; // Branco (alertas)
 
   // Tema escuro (principal baseado no wireframe)
   static ThemeData darkTheme = ThemeData(
@@ -26,25 +32,25 @@ class AppTheme {
     ),
     textTheme: GoogleFonts.interTextTheme(
       ThemeData.dark().textTheme.copyWith(
-        headlineLarge: const TextStyle(
-          color: textPrimaryColor,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
-        headlineMedium: const TextStyle(
-          color: textPrimaryColor,
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
-        ),
-        bodyLarge: const TextStyle(
-          color: textPrimaryColor,
-          fontSize: 16,
-        ),
-        bodyMedium: const TextStyle(
-          color: textSecondaryColor,
-          fontSize: 14,
-        ),
-      ),
+            headlineLarge: const TextStyle(
+              color: textPrimaryColor,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+            headlineMedium: const TextStyle(
+              color: textPrimaryColor,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
+            bodyLarge: const TextStyle(
+              color: textPrimaryColor,
+              fontSize: 16,
+            ),
+            bodyMedium: const TextStyle(
+              color: textSecondaryColor,
+              fontSize: 14,
+            ),
+          ),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: backgroundColor,
@@ -69,7 +75,8 @@ class AppTheme {
         ),
       ),
     ),
-    cardTheme: CardThemeData( // Corrigido: CardTheme → CardThemeData
+    cardTheme: CardThemeData(
+      // Corrigido: CardTheme → CardThemeData
       color: surfaceColor,
       elevation: 0,
       shape: RoundedRectangleBorder(

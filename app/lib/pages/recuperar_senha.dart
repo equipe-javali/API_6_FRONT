@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:app/services/auth_service.dart'; 
 
+import 'package:app/app/theme.dart';
+
+
 class RecuperarSenhaPage extends StatefulWidget {
   const RecuperarSenhaPage({super.key});
 
@@ -59,10 +62,10 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: AppTheme.backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
-          side: const BorderSide(color: Color(0xFF9C7BFF), width: 1),
+          side: const BorderSide(color: AppTheme.primaryColor, width: 1),
         ),
         title: Row(
           children: [
@@ -81,7 +84,7 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF9C7BFF),
+              backgroundColor: AppTheme.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -109,14 +112,14 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        foregroundColor: const Color(0xFF9C7BFF),
+        backgroundColor: AppTheme.backgroundColor,
+        foregroundColor: AppTheme.primaryColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.go('/login'),
         ),
       ),
       body: LayoutBuilder(
@@ -149,7 +152,7 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
       children: [
         Icon(
           Icons.lock_reset,
-          color: const Color(0xFF9C7BFF),
+          color: AppTheme.primaryColor,
           size: isMobile ? 60 : 72,
         ),
         const SizedBox(height: 20),
@@ -158,7 +161,7 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
           'Recuperar Senha',
           textAlign: TextAlign.center,
           style: GoogleFonts.comfortaa(
-            color: const Color(0xFF9C7BFF),
+            color: AppTheme.primaryColor,
             fontSize: isMobile ? 24 : 28,
             fontWeight: FontWeight.bold,
           ),
@@ -190,7 +193,7 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
           child: ElevatedButton(
             onPressed: isLoading ? null : _recuperarSenha,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF9C7BFF),
+              backgroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -215,7 +218,7 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               border: Border.all(color: Colors.red),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -241,11 +244,11 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
 
         // VOLTAR PARA LOGIN
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.go('/login'),
           child: Text(
             'Voltar para o Login',
             style: GoogleFonts.comfortaa(
-              color: const Color(0xFF9C7BFF),
+              color:  AppTheme.primaryColor,
               fontSize: isMobile ? 14 : 15,
             ),
           ),
@@ -256,15 +259,15 @@ class _RecuperarSenhaPageState extends State<RecuperarSenhaPage> {
 
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
-      prefixIcon: Icon(icon, color: const Color(0xFF9C7BFF)),
+      prefixIcon: Icon(icon, color:  AppTheme.primaryColor),
       labelText: label,
-      labelStyle: GoogleFonts.comfortaa(color: const Color(0xFF9C7BFF)),
+      labelStyle: GoogleFonts.comfortaa(color:  AppTheme.primaryColor),
       enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFF9C7BFF)),
+        borderSide: const BorderSide(color: AppTheme.primaryColor),
         borderRadius: BorderRadius.circular(8),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFF9C7BFF), width: 2),
+        borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
         borderRadius: BorderRadius.circular(8),
       ),
     );

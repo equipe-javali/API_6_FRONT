@@ -27,12 +27,10 @@ class AuthService {
 
         return token;
       } else {
-        print("Erro: ${response.body}");
-        return null;
+        throw Exception("Erro: ${response.body}");
       }
     } catch (e) {
-      print("Exceção no login: $e");
-      return null;
+      throw Exception("Exceção no login: $e");
     }
   }
 
