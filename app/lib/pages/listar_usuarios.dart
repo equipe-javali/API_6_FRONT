@@ -53,13 +53,6 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   });
 }
 
-  Future<void> _loadAdmin() async {
-  final prefs = await SharedPreferences.getInstance();
-  setState(() {
-    _isAdmin = prefs.getBool('is_admin') ?? false;
-  });
-}
-
   Future<List<Usuario>> listarUsuarios() async {
     final url = Uri.parse('http://127.0.0.1:8000/users');
     final token = await _getToken();
@@ -114,7 +107,6 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     }
   }
 
-  bool isSendingReport = false;
 
   Future<void> _enviarRelatorio() async {
     setState(() {

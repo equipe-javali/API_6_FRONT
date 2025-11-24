@@ -7,20 +7,15 @@ const double kDesktopBreakpoint = 720.0;
 
 class AppMenu extends StatefulWidget {
   const AppMenu({super.key});
-  bool _isAdmin = false;
 
   @override
-  void initState() {
-    super.initState();
-    _loadAdminStatus();
-  }
+  State<AppMenu> createState() => _AppMenuState();
+}
 
-  Future<void> _loadAdminStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isAdmin = prefs.getBool('is_admin') ?? false;
-    });
-  }
+class _AppMenuState extends State<AppMenu> {
+  bool _showHelp = false;
+  bool _isAdmin = false;
+  
 
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,21 +30,17 @@ class AppMenu extends StatefulWidget {
       backgroundColor: AppTheme.backgroundColor,
       child: Column(
         children: [
-          
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
-              children: const [
-                // _MenuItem(
-                //   icon: Icons.home_outlined,
-                //   title: 'Home',
-                //   route: '/home',
-                // ),
+              children: [
                 // CHAT — visível para todos
                 _MenuItem(
                   icon: Icons.chat_outlined,
                   title: 'Chat',
                   route: '/chat',
+                  helpText: 'Acesse o chat para fazer perguntas.',
+                  showHelp: _showHelp,
                 ),
 
                 // LISTAR USUÁRIOS — APENAS ADMIN
@@ -219,13 +210,17 @@ class _MenuItemState extends State<_MenuItem> {
   @override
   Widget build(BuildContext context) {
     final currentRoute = GoRouterState.of(context).matchedLocation;
-    final isActive = currentRoute == route && !isLogout;
+    final isActive = currentRoute == widget.route && !widget.isLogout;
 
+    final isMobile = MediaQuery.of(context).size.width < kDesktopBreakpoint;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      key: _itemKey,
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.primaryColor.withAlpha((0.1 * 255).round()) : null,
+        color: isActive
+            ? AppTheme.primaryColor.withAlpha((0.1 * 255).round())
+            : null,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(
