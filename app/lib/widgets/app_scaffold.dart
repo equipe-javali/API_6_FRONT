@@ -5,11 +5,13 @@ import 'package:app/app/theme.dart';
 class AppScaffold extends StatelessWidget {
   final Widget child;
   final String title;
+  final bool isAdmin;
 
   const AppScaffold({
     super.key,
     required this.child,
     this.title = 'API 6',
+    this.isAdmin = false,
   });
 
   @override

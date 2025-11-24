@@ -38,10 +38,12 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   late Future<List<Usuario>> _usuariosFuture;
   List<Usuario> _usuarios = [];
   bool isSendingReport = false;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
+    _loadAdmin();
     _usuariosFuture = listarUsuarios();
   }
 
@@ -50,9 +52,15 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     return prefs.getString('access_token');
   }
 
-  Future<List<Usuario>> listarUsuarios({int skip = 0, int limit = 20}) async {
-    final url =
-        Uri.parse('http://127.0.0.1:8000/users?skip=$skip&limit=$limit');
+  Future<void> _loadAdmin() async {
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    _isAdmin = prefs.getBool('is_admin') ?? false;
+  });
+}
+
+  Future<List<Usuario>> listarUsuarios() async {
+    final url = Uri.parse('http://127.0.0.1:8000/users');
     final token = await _getToken();
 
     final response = await http.get(
@@ -127,6 +135,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       );
     }
   }
+
 
   Future<void> _enviarRelatorio() async {
     setState(() => isSendingReport = true);

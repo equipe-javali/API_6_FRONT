@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,32 +18,69 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final authService = AuthService();
+
   bool isLoading = false;
   String? errorMessage;
 
   Future<void> _login() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+  setState(() {
+    isLoading = true;
+    errorMessage = null;
+  });
 
-    final token = await authService.login(
-      emailController.text,
-      passwordController.text,
+  try {
+    final loginResult = await authService.login(
+      emailController.text.trim(),
+      passwordController.text.trim(),
     );
 
-    setState(() => isLoading = false);
+    if (loginResult == null) {
+      throw Exception("Usuário ou senha inválidos");
+    }
+
+    final token = loginResult["access_token"];
+
+    // Agora usa o método certo
+    final response = await authService.authenticatedGet("/users/me");
+
+    if (response.statusCode != 200) {
+      throw Exception("Erro ao obter dados do usuário");
+    }
+
+    final data = jsonDecode(response.body);
+    print("JSON RECEBIDO DO BACK: $data");
+
+    final rawAdmin = data["admin"] ?? data["is_admin"];
+    print("VALOR RECEBIDO DO BACK PARA ADMIN: $rawAdmin");
+
+    final isAdmin =
+    rawAdmin is bool ? rawAdmin :
+    rawAdmin is String ? rawAdmin.toLowerCase() == "true" :
+    rawAdmin is int ? rawAdmin == 1 :
+    false;
+
+    print("VALOR ISADMIN: $isAdmin");
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("is_admin", isAdmin);
 
     if (!mounted) return;
 
-    if (token != null) {
-      context.go('/usuarios');
+    if (isAdmin) {
+      context.go("/usuarios");
     } else {
-      setState(() {
-        errorMessage = "Usuário ou senha inválidos";
-      });
+      context.go("/chat");
+    }
+
+  } catch (e) {
+    setState(() => errorMessage = e.toString());
+  } finally {
+    if (mounted) {
+      setState(() => isLoading = false);
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         const SizedBox(height: 10),
 
-        // ✅ LINK "ESQUECI MINHA SENHA"
+        // LINK "ESQUECI MINHA SENHA"
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
