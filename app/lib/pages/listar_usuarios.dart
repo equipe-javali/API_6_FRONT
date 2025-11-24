@@ -31,10 +31,13 @@ class ListarUsuariosPage extends StatefulWidget {
 class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   late Future<List<Usuario>> _usuariosFuture;
   List<Usuario> _usuarios = [];
+  bool isSendingReport = false;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
+    _loadAdmin();
     _usuariosFuture = listarUsuarios();
   }
 
@@ -42,6 +45,20 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('access_token');
   }
+
+  Future<void> _loadAdmin() async {
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    _isAdmin = prefs.getBool('is_admin') ?? false;
+  });
+}
+
+  Future<void> _loadAdmin() async {
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    _isAdmin = prefs.getBool('is_admin') ?? false;
+  });
+}
 
   Future<List<Usuario>> listarUsuarios() async {
     final url = Uri.parse('http://127.0.0.1:8000/users');
