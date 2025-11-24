@@ -10,38 +10,10 @@ FRONT-END
 <h1 align='center'> :keyboard:  :keyboard: </h1>
 
 ## :mag_right: Índice
-<p align='center'> <!-- 
-    <a href="#telas">Telas e Páginas</a> |
-    <a href="#estrutura">Estrutura</a>  |
-    <a href="#requisitos">Requisitos</a> |
-    <a href="#teste">Teste</a> | -->
+<p align='center'>
     <a href="#execucao">Execução</a> |
     <a href="#estrategia">Estratégia de Branches</a>
 </p>
-
-<!-- <span id="telas">
-
-## :bust_in_silhouette: Descrição das Telas e Páginas
-
-→ [Voltar ao topo](#topo)
-
-<span id="estrutura">
-
-## :scroll: Descrição da Estrutura
-
-→ [Voltar ao topo](#topo)
-
-<span id="requisitos">
-
-## :clipboard: Requisitos para a Execução
-
-→ [Voltar ao topo](#topo)
-
-<span id="teste">
-
-## 🧪 Instruções para Testar 
-
-→ [Voltar ao topo](#topo) -->
 
 <span id="execucao">
 
