@@ -643,17 +643,22 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
       ),
     );
   }
-
+    
   Future<void> _carregarMaisUsuarios() async {
     final novosUsuarios = await listarUsuarios(
       skip: _usuarios.length,
       limit: 20,
     );
     setState(() {
-      _usuarios.addAll(novosUsuarios);
+      // Adiciona apenas usuários que ainda não estão na lista
+      for (final usuario in novosUsuarios) {
+        if (!_usuarios.any((u) => u.id == usuario.id)) {
+          _usuarios.add(usuario);
+        }
+      }
     });
   }
-
+  // ...existing code...
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
