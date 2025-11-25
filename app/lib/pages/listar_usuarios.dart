@@ -42,10 +42,12 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
   late Future<List<Usuario>> _usuariosFuture;
   List<Usuario> _usuarios = [];
   bool isSendingReport = false;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
+    _loadAdmin();
     _usuariosFuture = listarUsuarios();
   }
 
@@ -54,9 +56,17 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     return prefs.getString('access_token');
   }
 
+  Future<void> _loadAdmin() async {
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    _isAdmin = prefs.getBool('is_admin') ?? false;
+  });
+}
+
   Future<List<Usuario>> listarUsuarios({int skip = 0, int limit = 20}) async {
     final url =
         Uri.parse('${_authService.baseUrl}/users/?skip=$skip&limit=$limit');
+
     final token = await _getToken();
 
     final response = await http.get(
@@ -133,6 +143,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
     }
   }
 
+
   Future<void> _enviarRelatorio() async {
     setState(() => isSendingReport = true);
 
@@ -159,6 +170,7 @@ class _ListarUsuariosPageState extends State<ListarUsuariosPage> {
         url,
         headers: {
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
           
         },
       );

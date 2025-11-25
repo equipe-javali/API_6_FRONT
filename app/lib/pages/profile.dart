@@ -13,7 +13,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   bool _receberRelatorio = false;
@@ -32,7 +31,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void dispose() {
-    _nomeController.dispose();
     _emailController.dispose();
     _senhaController.dispose();
     super.dispose();
@@ -43,17 +41,17 @@ class _ProfilePageState extends State<ProfilePage> {
       final token = await _authService.getToken();
       if (token == null) return;
 
-      final url = Uri.parse("${_authService.baseUrl}/users/me/");
+      final url = Uri.parse("${_authService.baseUrl}/users/me");
       final resp = await http.get(url, headers: {
         "Authorization": "Bearer $token",
       });
 
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
+        print(resp.body);
 
         setState(() {
           _userId = data["id"]; // ✔ sempre o usuário autenticado
-          _nomeController.text = data["nome"] ?? "";
           _emailController.text = data["email"] ?? "";
           _receberRelatorio = data["recebe_boletim"] ?? false;
           _isLoadingUser = false;
@@ -163,23 +161,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     // --- Linha Nome + Email ---
                     Row(
                       children: [
-                        SizedBox(
-                          width: half,
-                          child: TextFormField(
-                            controller: _nomeController,
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              labelText: "Nome",
-                              prefixIcon: const Icon(Icons.person),
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 14, horizontal: 12),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: gap),
                         SizedBox(
                           width: half,
                           child: TextFormField(

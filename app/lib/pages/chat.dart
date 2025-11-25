@@ -275,7 +275,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _loadCurrentUser(String token) async {
     try {
-      final url = Uri.parse('${_authService.baseUrl}/users/me/');
+      final url = Uri.parse('${_authService.baseUrl}/users/me');
       final resp =
           await http.get(url, headers: {'Authorization': 'Bearer $token'});
       if (resp.statusCode == 200) {
